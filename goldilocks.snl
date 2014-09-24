@@ -1,0 +1,22 @@
+Character:
+name is userenters.
+hair_color is "yellow"
+
+start stage1:
+show Character's name + " finds a house."
+if userenters = "\n"
+(next stage2)
+
+
+stage2:
+show "She enters the house and eats and sleeps."
+if userenters = "\n"
+(next stage3)
+
+stage3:
+show "The three bears find " + Character's name + ". She runs away."
+if userenters = "\n"
+(next stage4)
+
+end stage4:
+show "The End."
