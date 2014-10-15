@@ -36,5 +36,5 @@ rule token = parse
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and comment = parse
-  "\n" { token lexbuf }
+  '\n' { token lexbuf }
 | _    { comment lexbuf }
