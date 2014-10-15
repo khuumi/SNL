@@ -1,12 +1,13 @@
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token COMMENT COLON LPAREN RPAREN LBRACKET RBRACKET COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
-%token RETURN IF ELSE FOR WHILE INT
-%token <int> LITERAL
+%token IF ELSE
+%token START END NEXT DO TO OF LOCAL
+%token <int> INT
 %token <string> ID
-%token EOF
+%token NEWLINE EOF
 
 %nonassoc NOELSE
 %nonassoc ELSE
