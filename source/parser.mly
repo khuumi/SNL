@@ -55,7 +55,7 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | DO ID TO LBRACKET list_contents RBRACKET { Call($2, $5) }
-  | LBRACKET list_contents RBRACKET { $2 }
+  | LBRACKET list_contents RBRACKET { List($2) }
 
 list_contents:
     /* nothing */ { [] }
