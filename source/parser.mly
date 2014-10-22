@@ -54,12 +54,13 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | LPAREN expr RPAREN { $2 }
-  | DO ID TO LBRACKET actuals_opt RBRACKET { Call($2, $5) }
+  | DO ID TO LBRACKET list_contents RBRACKET { Call($2, $5) }
+  | LBRACKET list_contents RBRACKET { $2 }
 
-actuals_opt:
+list_contents:
     /* nothing */ { [] }
-  | actuals_list  { List.rev $1 }
+  | list_builder  { List.rev $1 }
 
-actuals_list:
+list_builder:
     expr               { [$1] }
-  | actuals_list COMMA expr { $3 :: $1 }
+  | list_builder COMMA expr { $3 :: $1 }
