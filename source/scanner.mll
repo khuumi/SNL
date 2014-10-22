@@ -1,7 +1,7 @@
 { open Parser }
 
-rule token = parse
-  [' ' '\t' '\r'] { token lexbuf }
+rule tokenize = parse
+  [' ' '\t' '\r'] { tokenize lexbuf }
 | "#"      { comment lexbuf }
 | ':'      { COLON }
 | '('      { LPAREN }
@@ -22,6 +22,8 @@ rule token = parse
 | "is"     { ASSIGN }
 | "if"     { IF }
 | "else"   { ELSE }
+| "and"    { AND }
+| "or"     { OR }
 | "start"  { START }
 | "end"    { END }
 | "next"   { NEXT }
@@ -36,5 +38,5 @@ rule token = parse
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and comment = parse
-  '\n' { token lexbuf }
+  '\n' { tokenize lexbuf }
 | _    { comment lexbuf }
