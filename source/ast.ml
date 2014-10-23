@@ -1,25 +1,32 @@
-type op = Add | Sub | Mult | Div | Equal | Neq | Lt | Leq | Gt | Geq
+type op = 
+    Add | Sub | Mult | Div | Negate
+  | Equal | Neq | Lt | Leq | Gt | Geq
+  | And | Or | Not
 
-type expr =
+type constant =
     Int of int
   | Float of float
+  | String of string
+
+type expr =
+    Constant of constant
   | Id of string
+  | Unop of op * expr
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list
   | List of expr list
 
 type stmt =
-    Block of stmt list
-  | Expr of expr
+    Expr of expr
   | If of expr * stmt * stmt
 
-type stage_decl = {
-    stage_name: string;
-    body: stmt list;
-  }
+(* type stage_decl = { *)
+(*     stage_name: string; *)
+(*     body: stmt list; *)
+(*   } *)
 
-type program = string list * stage_decl list
+(* type program = string list * stage_decl list *)
 
 (* Low-level AST printing, to help debug the structure.  These functions are
    only for debugging (the -r flag) and can be removed. *)

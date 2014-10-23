@@ -7,60 +7,68 @@
 %token START END NEXT DO TO OF LOCAL
 %token <int> INT
 %token <float> FLOAT
-%token <string> ID
+%token <string> ID STRING
 %token NEWLINE EOF
 
+%nonassoc COMMA
 %nonassoc NOELSE
 %nonassoc ELSE
+%nonassoc NOTO
 %right DO TO
 %right ASSIGN
-%left EQ NEQ
-%left LT GT LEQ GEQ
+%left AND OR
+%right NOT
+%left EQ NEQ LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
+%nonassoc UMINUS
 
-%start program
-%type <Ast.program> program
+%start stmt
+%type <Ast.stmt> stmt
 
 %%
 
-program:
-   /* nothing */ { [], [] }
- | program stage_decl { fst $1, ($2 :: snd $1) }
+constant:
+    INT    { Int($1) }
+  | FLOAT  { Float($1) }
+  | STRING { String($1) }
 
-stage_decl:
-   ID COLON stmt
-     { { stage_name = $1;
-	 body = $3 } }
+sequence:
+    /* nothing */    %prec COMMA { [] }
+  | sequence_builder %prec COMMA { List.rev $1 }
+
+sequence_builder:
+    expr                        %prec COMMA { [$1] }
+  | sequence_builder COMMA expr %prec COMMA { $3 :: $1 }
+
+expr:
+    constant { Constant($1) }
+  | LPAREN expr RPAREN { $2 }
+  | ID { Id($1) }
+  | LBRACKET sequence RBRACKET { List($2) }
+  | ID ASSIGN expr { Assign($1, $3) }
+  | math { $1 }
+  | logic { $1 }
+  | DO ID TO sequence { Call($2, $4) }
+  | DO ID %prec NOTO { Call($2, []) }
+
+math:
+    expr PLUS   expr { Binop($1, Add, $3) }
+  | expr MINUS  expr { Binop($1, Sub, $3) }
+  | expr TIMES  expr { Binop($1, Mult, $3) }
+  | expr DIVIDE expr { Binop($1, Div, $3) }
+  | MINUS expr %prec UMINUS  { Unop(Negate, $2) }
+
+logic:
+    expr EQ  expr { Binop($1, Equal, $3) }
+  | expr NEQ expr { Binop($1, Neq, $3) }
+  | expr LT  expr { Binop($1, Lt, $3) }
+  | expr LEQ expr { Binop($1, Leq, $3) }
+  | expr GT  expr { Binop($1, Gt, $3) }
+  | expr GEQ expr { Binop($1, Geq, $3) }
+  | expr AND expr { Binop($1, And, $3) }
+  | expr OR  expr { Binop($1, Or, $3) }
+  | NOT expr      { Unop(Not, $2) }
 
 stmt:
     expr NEWLINE { Expr($1) }
-  | IF expr stmt %prec NOELSE { If($2, $3, Block([])) }
-  | IF expr stmt ELSE stmt { If($2, $3, $5) }
-
-expr:
-    INT              { Int($1) }
-  | FLOAT            { Float($1) }
-  | ID               { Id($1) }
-  | expr PLUS   expr { Binop($1, Add,   $3) }
-  | expr MINUS  expr { Binop($1, Sub,   $3) }
-  | expr TIMES  expr { Binop($1, Mult,  $3) }
-  | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr EQ     expr { Binop($1, Equal, $3) }
-  | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Lt,  $3) }
-  | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Gt,  $3) }
-  | expr GEQ    expr { Binop($1, Geq,   $3) }
-  | ID ASSIGN expr   { Assign($1, $3) }
-  | LPAREN expr RPAREN { $2 }
-  | DO ID TO LBRACKET list_contents RBRACKET { Call($2, $5) }
-  | LBRACKET list_contents RBRACKET { List($2) }
-
-list_contents:
-    /* nothing */ { [] }
-  | list_builder  { List.rev $1 }
-
-list_builder:
-    expr               { [$1] }
-  | list_builder COMMA expr { $3 :: $1 }
