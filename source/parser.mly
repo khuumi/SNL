@@ -22,6 +22,7 @@
 %left PLUS MINUS
 %left TIMES DIVIDE
 %nonassoc UMINUS
+%nonassoc LPAREN RPAREN
 
 %start stmt
 %type <Ast.stmt> stmt
@@ -34,29 +35,28 @@ constant:
   | STRING { String($1) }
 
 sequence:
-    /* nothing */    %prec COMMA { [] }
+    /* nothing */ %prec COMMA    { [] }
   | sequence_builder %prec COMMA { List.rev $1 }
 
 sequence_builder:
-    expr                        %prec COMMA { [$1] }
+    expr %prec COMMA                        { [$1] }
   | sequence_builder COMMA expr %prec COMMA { $3 :: $1 }
 
 expr:
-    constant { Constant($1) }
-  | LPAREN expr RPAREN { $2 }
-  | ID { Id($1) }
+    constant                   { Constant($1) }
+  | LPAREN expr RPAREN         { $2 }
+  | ID                         { Id($1) }
   | LBRACKET sequence RBRACKET { List($2) }
-  | ID ASSIGN expr { Assign($1, $3) }
-  | math { $1 }
-  | logic { $1 }
-  | DO ID TO sequence { Call($2, $4) }
-  | DO ID %prec NOTO { Call($2, []) }
+  | ID ASSIGN expr             { Assign($1, $3) }
+  | math                       { $1 }
+  | logic                      { $1 }
+  | func_app                   { $1 }
 
 math:
-    expr PLUS   expr { Binop($1, Add, $3) }
-  | expr MINUS  expr { Binop($1, Sub, $3) }
-  | expr TIMES  expr { Binop($1, Mult, $3) }
-  | expr DIVIDE expr { Binop($1, Div, $3) }
+    expr PLUS   expr         { Binop($1, Add, $3) }
+  | expr MINUS  expr         { Binop($1, Sub, $3) }
+  | expr TIMES  expr         { Binop($1, Mult, $3) }
+  | expr DIVIDE expr         { Binop($1, Div, $3) }
   | MINUS expr %prec UMINUS  { Unop(Negate, $2) }
 
 logic:
@@ -70,5 +70,18 @@ logic:
   | expr OR  expr { Binop($1, Or, $3) }
   | NOT expr      { Unop(Not, $2) }
 
+func_app:
+    DO ID TO sequence { Call($2, $4) }
+  | DO ID %prec NOTO  { Call($2, []) }
+
 stmt:
     expr NEWLINE { Expr($1) }
+  | IF expr block ELSE block { If($2, $3, $5) }
+  | IF expr block %prec NOELSE { If($2, $3, Block([])) }
+
+block:
+    LPAREN block_builder RPAREN %prec COMMA { Block(List.rev $2) }
+
+block_builder:
+    expr %prec COMMA                       { [$1] }
+  | block_builder NEWLINE expr %prec COMMA { $3 :: $1 }

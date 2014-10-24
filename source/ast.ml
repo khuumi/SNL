@@ -17,9 +17,12 @@ type expr =
   | Call of string * expr list
   | List of expr list
 
+type block =
+    Block of expr list
+
 type stmt =
     Expr of expr
-  | If of expr * stmt * stmt
+  | If of expr * block * block
 
 (* type stage_decl = { *)
 (*     stage_name: string; *)
