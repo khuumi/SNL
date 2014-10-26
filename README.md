@@ -23,6 +23,8 @@ Since our program will essentially model state diagrams, a “story” that can 
 Types are directly inferred from the data supplied for the variable. For example, if a string is assigned to a variable, then the variable is given an implicit string type. The primitive types are currently limited to integers, doubles, strings, and lists; these primitives being easy for children to understand and yet powerful enough to create robust logic. There are also two special object types: Character and Stages.
 
 *Operators and Keywords*
+
+
 Basic Arithmetic (+, -, *, /)
 String Concatenation (+)
 Assignment (is)
@@ -32,9 +34,13 @@ Control Flow (next, start, end)
 Special Object Declaration (:)
 
 *Stages*
+
+
 In place of functions, SNL uses Stages, which contain variables and logic in order to determine the character’s transition to another state.
 
 *Input/Output*
+
+
 In SNL the keyword input is used to denote any recently entered keyboard text.
 Character
 A special global object meant to loosely simulate the user, which carries attributes that can be modified by any Stage.  There will be only one Character per program.
