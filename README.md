@@ -9,6 +9,7 @@ COMS W4115 - Programming Languages and Translators
 
 
 *Introduction*
+
 SNL is a language designed to model role-playing game scenarios based on the structure of state machines. It allows users to programmatically re-create sequential scenarios as “stories.” Its syntax aims to be simple so that adolescents can easily understand how to use it. Where possible, SNL uses intuitive keywords in place of symbols, since symbols commonly known in the CS community can be confusing to those who are unfamiliar with programming. This will encourage children to learn how to write code in a controlled, fun environment while allowing them to exercise their creativity.
 
 *Motivation*
@@ -17,6 +18,7 @@ Since our program will essentially model state diagrams, a “story” that can 
 
 *Syntax*
 **Types**
+
 Types are directly inferred from the data supplied for the variable. For example, if a string is assigned to a variable, then the variable is given an implicit string type. The primitive types are currently limited to integers, doubles, strings, and lists; these primitives being easy for children to understand and yet powerful enough to create robust logic. There are also two special object types: Character and Stages.
 
 **Operators and Keywords**
