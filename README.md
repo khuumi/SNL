@@ -58,12 +58,13 @@ show "She enters the house and eats and sleeps."
 if input = "\n"
 (next stage3)
 
-stage3:
+stage3:  
 show "The three bears find " + Character's name + ". She runs away."
 if input = "\n"
 (next stage4)
 
-end stage4:
+end stage4:  
+
 show "The End."
 
 *Sample Program #2 - Factorial:*
