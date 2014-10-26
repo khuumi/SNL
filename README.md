@@ -44,42 +44,42 @@ A special global object meant to loosely simulate the user, which carries attrib
 
 *Sample Program #1 - Goldilocks:*
 
-Character:
-name is input
-hair_color is "yellow"
+Character:  
+name is input  
+hair_color is "yellow"  
 
-start stage1:
-show Character's name + " finds a house."
-if input = "\n"
-(next stage2)
+start stage1:  
+show Character's name + " finds a house."  
+if input = "\n"  
+(next stage2)  
 
-stage2:
-show "She enters the house and eats and sleeps."
-if input = "\n"
-(next stage3)
+stage2:  
+show "She enters the house and eats and sleeps."  
+if input = "\n"  
+(next stage3)  
 
 stage3:  
-show "The three bears find " + Character's name + ". She runs away."
-if input = "\n"
-(next stage4)
+show "The three bears find " + Character's name + ". She runs away."  
+if input = "\n"  
+(next stage4)  
 
-end stage4:  
+end stage4:   
 
-show "The End."
+show "The End."  
 
-*Sample Program #2 - Factorial:*
+*Sample Program #2 - Factorial:*  
 
-Character:
-num is 5
-total is 1
+Character:  
+num is 5  
+total is 1  
 
-start stage1:
-if num = 0
-(next last)
+start stage1:  
+if num = 0  
+(next last)  
 
-total is total * num
-num is num - 1
-next stage1
+total is total * num  
+num is num - 1  
+next stage1  
 
 end last:
 show total
