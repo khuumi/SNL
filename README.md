@@ -1,4 +1,4 @@
-== SNL (Stage (null) Language) Project Proposal ==
+=== SNL (Stage (null) Language) Project Proposal ===
 Alex Liu, al3037 (Language Guru)
 Andre Paiva, app2125 (Verification & Validation)
 Daniel Maxson, dsm2157 (System Architect)
