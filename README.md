@@ -17,6 +17,7 @@ SNL is a language designed to model role-playing game scenarios based on the str
 Since our program will essentially model state diagrams, a “story” that can be expressed in terms of an initial Character input and transitions between states can be rewritten in SNL. This could be something simple and yet computational like the calculation of GCD or Factorial. The larger intent, however, was for users of SNL to implement creative scenarios, such as stories (especially Multi-Ending Chapter Books or Interactive Role Playing Games). A further application of SNL could be the generation of computerized surveys and studies within the social sciences. 
 
 *Syntax*
+
 **Types**
 
 Types are directly inferred from the data supplied for the variable. For example, if a string is assigned to a variable, then the variable is given an implicit string type. The primitive types are currently limited to integers, doubles, strings, and lists; these primitives being easy for children to understand and yet powerful enough to create robust logic. There are also two special object types: Character and Stages.
@@ -40,6 +41,7 @@ A special global object meant to loosely simulate the user, which carries attrib
 
 
 *Sample Programs*
+
 **Sample Program #1 - Goldilocks:**
 
 Character:
