@@ -6,6 +6,7 @@ type op =
 type constant =
     Int of int
   | Float of float
+  | Bool of bool
   | String of string
 
 type expr =
@@ -16,18 +17,33 @@ type expr =
   | Assign of string * expr
   | Call of string * expr list
   | List of expr list
-
-type block =
-    Block of expr list
+  | Return of expr
+  | Next of string
 
 type stmt =
     Expr of expr
-  | If of expr * block * block
+  | Block of expr list
+  | If of expr * stmt * stmt
 
-(* type stage_decl = { *)
-(*     stage_name: string; *)
-(*     body: stmt list; *)
-(*   } *)
+type stage = {
+    name: string;         (* Name of the stage. *)
+    locals: string list;  (* Locally defined variables. *)
+    body: stmt list;      (* The statements that comprise the stage. *)
+    is_start: bool;       (* Whether the stage is a start stage. *)
+}
+
+type recipe = {
+    name: string;          (* Name of the recipe. *)
+    formals: string list;  (* Formal argument names. *)
+    body: stage list;      (* Stages in the recipe's scope. *)
+    globals: string list;  (* Variables global inside the recipe. *)
+}
+
+type program = {
+    recipes: recipe list;
+    stages: stage list;
+}
+
 
 (* type program = string list * stage_decl list *)
 

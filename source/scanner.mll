@@ -1,8 +1,12 @@
 { open Parser }
 
+let digit = ['0'-'9']
+let whitespace = [' ' '\t' '\r']
+
+
 rule tokenize = parse
-  (* Whitespace we ignore. *)
-  | [' ' '\t' '\r'] { tokenize lexbuf }
+  (* Whitespace we split on. *)
+  | whitespace { tokenize lexbuf }
 
   (* Comments. *)
   | "#"      { comment lexbuf }
@@ -20,6 +24,7 @@ rule tokenize = parse
   | ">="     { GEQ }
   | "and"    { AND }
   | "or"     { OR }
+  | "not"    { NOT }
 
   (* Control flow. *)
   | "if"     { IF }
@@ -30,31 +35,36 @@ rule tokenize = parse
   | "to"     { TO }
 
   (* Used for grouping things and creating lists. *)
-  | "("      { LPAREN }
-  | ")"      { RPAREN }
-  | "["      { LBRACKET }
-  | "]"      { RBRACKET }
-  | ","      { COMMA }
+  | "(" (whitespace|'\n')*  { LPAREN }
+  | (whitespace|'\n')* ")"  { RPAREN }
+  | "["                     { LBRACKET }
+  | "]"                     { RBRACKET }
+  | ","                     { COMMA }
 
-  (* Stage-related terms. *)
+  (* Recipe- and stage-related terms. *)
   | ":"      { COLON }
+  | "recipe" { RECIPE }
+  | "done"   { DONE }
   | "start"  { START }
-  | "end"    { END }
   | "next"   { NEXT }
+  | "return" { RETURN }
 
   (* Other operators used with variables. *)
   | "is"     { ASSIGN }
   | "of"     { OF }
   | "local"  { LOCAL }
 
-  (* Literals: int, float, and string. *)
-  | ['0'-'9']+ as lxm { INT(int_of_string lxm) }
+  (* Identifiers and literals (int, float, bool, string). *)
+  | digit+ as lxm { INT(int_of_string lxm) }
   | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+  | (digit+'.'digit*)|(digit*'.'digit+) as lxm { FLOAT(float_of_string lxm) }
+  | "true"   { TRUE }
+  | "false"  { FALSE }
   | '"'      { read_string (Buffer.create 17) lexbuf }
 
-  (* Special characters we use to mark end of program/statement. *)
-  | eof { EOF }
-  | "\n" { NEWLINE }
+  (* Special characters we use to mark end of programs/statements. *)
+  | eof   { EOF }
+  | "\n+" { NEWLINE }  (* Empty lines are collapsed. *)
 
   (* Anything else is an illegal character. *)
   | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
@@ -75,6 +85,7 @@ and read_string buf = parse
   | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
   | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
   | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | '\\' '"'  { Buffer.add_char buf '"'; read_string buf lexbuf }
   | [^ '"' '\\']+
       { Buffer.add_string buf (Lexing.lexeme lexbuf);
         read_string buf lexbuf
