@@ -50,7 +50,8 @@ constant:
 expr:
     constant                   { Constant($1) }
   | LPAREN expr RPAREN         { $2 }
-  | ID                         { Id($1) }
+  | ID                         { Id($1, Global) }
+  | LOCAL ID                   { Id($2, Local) }
   | LBRACKET expr_seq RBRACKET { List($2) }
   | ID ASSIGN expr             { Assign($1, $3) }
   | math                       { $1 }

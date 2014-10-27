@@ -3,6 +3,8 @@ type op =
   | Equal | Neq | Lt | Leq | Gt | Geq
   | And | Or | Not
 
+type scope = Local | Global
+
 type constant =
     Int of int
   | Float of float
@@ -11,7 +13,7 @@ type constant =
 
 type expr =
     Constant of constant
-  | Id of string
+  | Id of string * scope
   | Unop of op * expr
   | Binop of expr * op * expr
   | Assign of string * expr
@@ -44,8 +46,6 @@ type program = {
     stages: stage list;
 }
 
-
-(* type program = string list * stage_decl list *)
 
 (* Low-level AST printing, to help debug the structure.  These functions are
    only for debugging (the -r flag) and can be removed. *)
