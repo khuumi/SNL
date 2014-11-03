@@ -64,7 +64,7 @@ rule tokenize = parse
 
   (* Special characters we use to mark end of programs/statements. *)
   | eof   { EOF }
-  | "\n+" { NEWLINE }  (* Empty lines are collapsed. *)
+  | "\n"+ { NEWLINE }  (* Empty lines are collapsed. *)
 
   (* Anything else is an illegal character. *)
   | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
