@@ -54,6 +54,9 @@ rule tokenize = parse
   | "of"     { OF }
   | "local"  { LOCAL }
 
+  (* I/O *)
+  | "input"  { INPUT }
+
   (* Identifiers and literals (int, float, bool, string). *)
   | digit+ as lxm { INT(int_of_string lxm) }
   | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
