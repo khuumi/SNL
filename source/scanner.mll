@@ -58,11 +58,11 @@ rule tokenize = parse
   | "input"  { INPUT }
 
   (* Identifiers and literals (int, float, bool, string). *)
+  | "true"   { TRUE }
+  | "false"  { FALSE }
   | digit+ as lxm { INT(int_of_string lxm) }
   | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
   | (digit+'.'digit*)|(digit*'.'digit+) as lxm { FLOAT(float_of_string lxm) }
-  | "true"   { TRUE }
-  | "false"  { FALSE }
   | '"'      { read_string (Buffer.create 17) lexbuf }
 
   (* Special characters we use to mark end of programs/statements. *)

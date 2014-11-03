@@ -25,6 +25,12 @@
 %nonassoc UMINUS
 %nonassoc LPAREN RPAREN
 
+%start expr
+%type <Ast.expr> expr
+
+%start stmt
+%type <Ast.stmt> stmt
+
 %start program
 %type <Ast.program> program
 
