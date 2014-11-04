@@ -66,6 +66,7 @@ expr:
   | recipe_app                 { $1 }
   | RETURN expr                { Return($2) }
   | NEXT ID                    { Next($2) }
+  | INPUT                      { Input }
 
 
 /* Mathematical expressions. */

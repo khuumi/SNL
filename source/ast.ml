@@ -21,6 +21,7 @@ type expr =
   | List of expr list
   | Return of expr
   | Next of string
+  | Input
 
 type stmt =
     Expr of expr
@@ -94,6 +95,7 @@ let rec expr_s = function
                     "]"
   | Return(e) -> "Return (" ^ expr_s e ^ ")"
   | Next(s) -> "Next " ^ s
+  | Input -> "input"
 
 let rec stmt_s = function
     Expr(e) -> "Expr (" ^ expr_s e ^ ")"
