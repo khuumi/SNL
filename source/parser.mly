@@ -10,6 +10,7 @@
 %token <string> ID STRING
 %token NEWLINE EOF
 
+%nonassoc NOCOMMA
 %nonassoc COMMA
 %nonassoc NOELSE
 %nonassoc ELSE
@@ -92,8 +93,8 @@ logic:
 /* A sequence is a comma-separated succession of exprs. It can be used inside
  * brackets to define a list or when defining or applying recipes. */
 expr_seq:
-    /* nothing */ %prec COMMA    { [] }
-  | expr_seq_builder %prec COMMA { List.rev $1 }
+    /* nothing */    %prec NOCOMMA { [] }
+  | expr_seq_builder %prec NOCOMMA { List.rev $1 }
 
 
 expr_seq_builder:

@@ -1,0 +1,1 @@
+Call func [(Call func2 []), (Float 16.9), (Call func3 [(Float 1.6), (Id Global c)]), (Id Local a), (Int 7)]

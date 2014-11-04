@@ -13,6 +13,10 @@ parser: parser.mly
 scanner: scanner.mll
 	ocamllex scanner.mll
 
+.PHONY: test
+test: ast_test
+	./run_tests.py
+
 .PHONY: clean
 clean:
 	rm -f parser.mli scanner.ml parser.ml parser.output *.cmo *.cmi snl_ast

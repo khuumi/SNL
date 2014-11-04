@@ -28,14 +28,14 @@ type stmt =
   | If of expr * stmt * stmt
 
 type stage = {
-    sname: string;         (* Name of the stage. *)
+    sname: string;        (* Name of the stage. *)
     locals: string list;  (* Locally defined variables. *)
     body: stmt list;      (* The statements that comprise the stage. *)
     is_start: bool;       (* Whether the stage is a start stage. *)
 }
 
 type recipe = {
-    rname: string;          (* Name of the recipe. *)
+    rname: string;         (* Name of the recipe. *)
     formals: string list;  (* Formal argument names. *)
     body: stage list;      (* Stages in the recipe's scope. *)
     globals: string list;  (* Variables global inside the recipe. *)
@@ -45,6 +45,9 @@ type program = {
     recipes: recipe list;
     stages: stage list;
 }
+
+
+(* Low-level AST printing, to help debug the structure. *)
 
 let op_s = function
     Add -> "Add"
@@ -62,7 +65,6 @@ let op_s = function
   | Or -> "Or"
   | Not -> "Not"
 
-(* Low-level AST printing, to help debug the structure. *)
 let constant_s = function
     Int(i) -> "Int " ^ string_of_int i
   | Float(f) -> "Float " ^ string_of_float f
@@ -75,7 +77,7 @@ let rec expr_s = function
                         (match scope with Local -> "Local "
                                         | Global -> "Global ") ^
                           str
-  | Unop(o, e) -> "Unop " ^ (op_s o) ^ " " ^ (expr_s e)
+  | Unop(o, e) -> "Unop " ^ (op_s o) ^ " (" ^ expr_s e ^ ")"
   | Binop(e1, o, e2) -> "Binop (" ^ expr_s e1 ^ ") " ^
                           (op_s o) ^
                             " (" ^ expr_s e2 ^ ")"
@@ -90,7 +92,7 @@ let rec expr_s = function
                                         (fun e -> "(" ^ expr_s e ^ ")")
                                         es) ^
                     "]"
-  | Return(e) -> "Return " ^ expr_s e
+  | Return(e) -> "Return (" ^ expr_s e ^ ")"
   | Next(s) -> "Next " ^ s
 
 let rec stmt_s = function
