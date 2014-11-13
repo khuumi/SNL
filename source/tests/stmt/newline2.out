@@ -1,0 +1,1 @@
+Expr (Call func1 [(Id Global a), (Int 7), (Call func2 [])])

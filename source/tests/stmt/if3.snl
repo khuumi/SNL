@@ -1,0 +1,5 @@
+if not is_done
+(is_done is x > 7
+y is z * 80)
+else (w is 39.2
+return true)

@@ -1,0 +1,3 @@
+If (Unop Not (Id Global is_done)) (Block [(Assign (Id Global is_done) (Binop (Id Global x) Gt (Int 7))),
+(Assign (Id Global y) (Binop (Id Global z) Mult (Int 80)))]) (Block [(Assign (Id Global w) (Float 39.2)),
+(Return (Bool true))])

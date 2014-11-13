@@ -1,0 +1,5 @@
+if y > 15.9
+(y is y + 7
+z is z - 53.8)
+else
+(local x is false)

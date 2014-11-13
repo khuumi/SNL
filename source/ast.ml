@@ -16,7 +16,7 @@ type expr =
   | Id of string * scope
   | Unop of op * expr
   | Binop of expr * op * expr
-  | Assign of string * expr
+  | Assign of expr * expr
   | Call of string * expr list
   | List of expr list
   | Return of expr
@@ -82,7 +82,7 @@ let rec expr_s = function
   | Binop(e1, o, e2) -> "Binop (" ^ expr_s e1 ^ ") " ^
                           (op_s o) ^
                             " (" ^ expr_s e2 ^ ")"
-  | Assign(v, e) -> "Assign " ^ v ^ " (" ^ expr_s e ^ ")"
+  | Assign(v, e) -> "Assign (" ^ expr_s v ^ ") (" ^ expr_s e ^ ")"
   | Call(f, es) -> "Call " ^ f ^ " [" ^
                      String.concat ", " (List.map
                                            (fun e -> "(" ^ expr_s e ^ ")")

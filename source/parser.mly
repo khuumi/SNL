@@ -52,15 +52,20 @@ constant:
   | STRING { String($1) }
 
 
+/* Ids may be local or global. */
+ids:
+    ID { Id($1, Global) }
+  | LOCAL ID { Id($2, Local) }
+
+
 /* exprs are the basic building blocks of programs.
  * No newlines are allowed inside.*/
 expr:
     constant                   { Constant($1) }
   | LPAREN expr RPAREN         { $2 }
-  | ID                         { Id($1, Global) }
-  | LOCAL ID                   { Id($2, Local) }
+  | ids                        { $1 }
   | LBRACKET expr_seq RBRACKET { List($2) }
-  | ID ASSIGN expr             { Assign($1, $3) }
+  | ids ASSIGN expr            { Assign($1, $3) }
   | math                       { $1 }
   | logic                      { $1 }
   | recipe_app                 { $1 }
@@ -99,8 +104,8 @@ expr_seq:
 
 
 expr_seq_builder:
-    expr %prec COMMA                        { [$1] }
-  | expr_seq_builder COMMA expr %prec COMMA { $3 :: $1 }
+    expr                        { [$1] }
+  | expr_seq_builder COMMA expr { $3 :: $1 }
 
 
 /* Applying recipes. */
@@ -112,20 +117,18 @@ recipe_app:
 /* A statement is either an expression or an if-else construct. */
 stmt:
     expr NEWLINE { Expr($1) }
-  | block NEWLINE { Block(List.rev $1) }
-  | IF expr NEWLINE stmt ELSE opt_nl stmt { If($2, $4, $7) }
-  | IF expr NEWLINE stmt %prec NOELSE { If($2, $4, Block([])) }
+  | IF expr NEWLINE LPAREN block_builder RPAREN NEWLINE
+    ELSE opt_nl LPAREN block_builder RPAREN
+       { If($2, Block(List.rev $5), Block(List.rev $11)) }
+  | IF expr NEWLINE LPAREN block_builder RPAREN %prec NOELSE
+       { If($2, Block(List.rev $5), Block([])) }
 
 
-/* A block is simply a sequence of expr separated by newlines and surrounded
- * by parentheses. */
-block:
-    LPAREN block_builder RPAREN %prec COMMA { $2 }
-
-
+/* A block is a sequence of expr separated by newlines that appears in an
+   if statement. */
 block_builder:
-    expr %prec COMMA                       { [$1] }
-  | block_builder NEWLINE expr %prec COMMA { $3 :: $1 }
+    expr                       { [$1] }
+  | block_builder NEWLINE expr { $3 :: $1 }
 
 
 stage_body:

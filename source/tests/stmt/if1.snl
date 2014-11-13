@@ -1,0 +1,2 @@
+if local x = 5
+(do func1 to local x, 7.9)
