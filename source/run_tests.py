@@ -38,9 +38,9 @@ def run_ast_tests(files, cmd_arg):
             output = subprocess.check_output([AST_BIN, cmd_arg], stdin=f)
         if expected_output != output:
             TOTAL_FAIL += 1
-            print 'FAIL: %s' % test
-            print '\texpected:\n\t%s' % expected_output
-            print '\tactual:\n\t%s' % output
+            print '\nFAIL: %s' % test
+            print 'EXPECTED:\n%s' % expected_output
+            print 'ACTUAL:\n%s' % output
         else:
             TOTAL_PASS += 1
             if args.v:
@@ -67,10 +67,21 @@ def run_stmt_tests():
     print 'Finished running stmt tests.\n'
 
 
+def run_program_tests():
+    """
+    Runs all the tests in the tests/program directory.
+    """
+    print 'Running program tests...'
+    program_tests = glob.glob('tests/program/*.snl')
+    run_ast_tests(program_tests, '-p')
+    print 'Finished running program tests.\n'
+
+
 def main():
     run_expr_tests()
     run_stmt_tests()
-    print '%d out of %d passing' % (TOTAL_PASS, TOTAL_PASS + TOTAL_FAIL)
+    run_program_tests()
+    print '%d out of %d tests passing.' % (TOTAL_PASS, TOTAL_PASS + TOTAL_FAIL)
 
 
 if __name__ == '__main__':

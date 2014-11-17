@@ -1,0 +1,6 @@
+recipes = [],
+stages = [{ sname = "another_stage"
+   is_start = false
+   locals = []
+   body = [Expr (Float 6.9)]}
+]

@@ -121,8 +121,9 @@ let recipe_s r =
           "]}\n"
 
 let program_s prog =
-  "([" ^ String.concat ",\n" (List.map recipe_s prog.recipes) ^ "],\n" ^
-    "[" ^  String.concat ",\n" (List.map stage_s prog.stages) ^ "])"
+  "recipes = [" ^ String.concat ",\n" (List.map recipe_s prog.recipes) ^
+    "],\n" ^
+    "stages = [" ^  String.concat ",\n" (List.map stage_s prog.stages) ^ "]"
 
 
 (* (\* "Pretty printed" version of the AST, meant to generate a MicroC program *)

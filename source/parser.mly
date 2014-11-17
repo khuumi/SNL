@@ -104,7 +104,7 @@ expr_seq:
 
 
 expr_seq_builder:
-    expr                        { [$1] }
+    expr %prec COMMA            { [$1] }
   | expr_seq_builder COMMA expr { $3 :: $1 }
 
 
