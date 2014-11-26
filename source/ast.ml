@@ -1,4 +1,4 @@
-type op = 
+type op =
   Add | Sub | Mult | Div | Negate |
   Equal | Neq | Lt | Leq | Gt | Geq |
   And | Or | Not
