@@ -11,14 +11,14 @@ public final class Recipe_does_hit_land{
 		defender_speed = defender_speed_arg;
 
 		Boolean returnBoolean = null;
-		returnBoolean = calc_does_hit_land();
+		returnBoolean = calc();
 		if(returnBoolean == null){
 			// call next helper
 		}
 		return returnBoolean.booleanValue();
 	}
 
-	private static Boolean calc_does_hit_land(){
+	private static Boolean calc(){
 		return new Boolean(attacker_speed >= defender_speed);
 	}
 

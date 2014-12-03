@@ -6,9 +6,9 @@ public class Sample{
 
 	// Universe
 	// global variables
-	// what security to put on these?
 	// how to infer type?
 	// need to be static for correct references
+	// again, these should come from data structure
 	private static int Character_HP = 10;
 	private static int Character_Attack = 10;
 	private static int Character_Defense = 5;
@@ -36,6 +36,8 @@ public class Sample{
 						"and \"BOSS\". Enter the label of the door you want to"+
 						" go through. Choose wisely: ");
 		// just perform string comparisons when dealing with user input?
+		// needs to be more complex since comparisons might be done
+		// need to detect for comparison
 		choice = progScanner.nextLine();
 		if(choice.equals("1") && !weapon_room_seen){
 			weapon_room();
