@@ -8,7 +8,7 @@ java: codegen.ml
 	ocamlc -c codegen.ml
 
 objects: parser scanner
-	ocamlc -c ast.ml parser.mli scanner.ml parser.ml
+	ocamlc -c ast.ml sast.ml parser.mli scanner.ml parser.ml analyzer.ml
 
 parser: parser.mly
 	ocamlyacc -v parser.mly
