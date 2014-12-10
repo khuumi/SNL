@@ -72,6 +72,7 @@ expr:
   | RETURN expr                { Return($2) }
   | NEXT ID                    { Next($2) }
   | INPUT                      { Input }
+  | INT OF ids                 { Access($1, $3) }
 
 
 /* Mathematical expressions. */

@@ -5,7 +5,9 @@ type t =
   | TFloat
   | TBool
   | TString
-  | TList
+  | TList of t array
+  | TOCamlString
+  | TUnknown
 
 type a_constant =
     AInt of int * t
@@ -19,9 +21,12 @@ type a_expr =
   | AUnop of Ast.op * a_expr * t
   | ABinop of a_expr * Ast.op * a_expr * t
   | AAssign of a_expr
-
-
-
+  | ANext of string * t
+  | AReturn of a_expr * t
+  | AList of a_expr list * t
+  | AInput of t
+  | ACall of string * a_expr list * t
+  | AAccess of int * a_expr * t
 
 (* type t_program = {
     t_recipes = t_recipe list
