@@ -5,27 +5,26 @@ open Sast
    and variables which are tuples of stings and Sast types *)
 type symbol_table = {
     mutable variables : (string * Sast.t) list;
-  }
+}
 
-                      
+
 type environment = {
-    mutable function_return_type : Sast.t option;
     global_scope : symbol_table;
     local_scope : symbol_table;
-  }
+}
 
-                     
+
 let type_of_const (ac : Sast.a_constant) : Sast.t =
   match ac with
-  | AInt(_, t) -> t
+    AInt(_, t) -> t
   | AFloat(_, t) -> t
   | ABool(_, t) -> t
   | AString(_, t) -> t
 
-                       
+
 let rec type_of (ae : Sast.a_expr) : Sast.t =
   match ae with
-  | AConstant(const) -> type_of_const const
+    AConstant(const) -> type_of_const const
   | AId(_,_, t) -> t
   | AUnop(_, _, t) -> t
   | ABinop(_, _, _, t) -> t
@@ -42,7 +41,7 @@ let find_variable_type (env : environment) (id : Ast.expr) :
       Sast.t option =
   try
     let (_, typ) = match id with
-      | Id(name, Local) -> List.find
+        Id(name, Local) -> List.find
                              (fun (s, _) -> s = name)
                              env.local_scope.variables
       | Id(name, Global) -> List.find
@@ -58,12 +57,12 @@ let find_variable_type (env : environment) (id : Ast.expr) :
 let mutate_or_add (env : environment) (id : Ast.expr) (new_type : Sast.t) =
   let typ = find_variable_type env id in
   let name, scope = match id with
-    | Id(i, Local) -> i, env.local_scope
+      Id(i, Local) -> i, env.local_scope
     | Id(i, Global) -> i, env.global_scope
     | _ -> failwith "Error using mutate_or_add"
   in
   match typ with
-  | Some(t) ->
+    Some(t) ->
      (* filter name, t out of symbol_table.variables *)
      scope.variables <-
        (name, new_type) :: (List.filter (fun (s, _) -> s <> name)
@@ -71,50 +70,23 @@ let mutate_or_add (env : environment) (id : Ast.expr) (new_type : Sast.t) =
   | None ->
      scope.variables <- (name, new_type) :: scope.variables
 
-                                              
+
 let require_int_float (expr : a_expr) (err : string) : int =
   match type_of expr with
-  | TInt -> 0
+    TInt -> 0
   | TFloat -> 1
   | _ -> failwith err
 
 
-let require_bool (expr : a_expr) (err : string) : int =
+let require_bool (expr : a_expr) (err : string) : bool =
   match type_of expr with
-  | TBool -> 0
+    TBool -> true
   | _ -> failwith err
 
-                  
-(* TODO: write this function *)
-let weak_eq_type (t1 : Sast.t) (t2 : Sast.t) =
-  true
-
-(*   let scope.variables =
-    scope.variables ::
- *)
-
-  (*
-    Check to see if e1 is actually an ID, then annotate e2 and add this
-    assignment to the enviroment ( check the scope of the ID to add it to
-    the correct one)
-
-   *)
-
-
-
-(* Loads of useful utilities -- let me build them out
-   later if I need them  *)
-
-(* First we annotate  *)
-
-(* let rec annotate_expr (e : Ast.expr ) (env : environment)
- *)
-
-(* what is the : Sast.t_expr actually doing? *)
 
 let annotate_const (c : Ast.constant) : Sast.a_expr =
   match c with
-  | Int(n) -> AConstant(AInt(n, TInt))
+    Int(n) -> AConstant(AInt(n, TInt))
   | Float(f) -> AConstant(AFloat(f, TFloat))
   | Bool(b) -> AConstant(ABool(b, TBool))
   | String(s) -> AConstant(AString(s, TString))
@@ -122,7 +94,7 @@ let annotate_const (c : Ast.constant) : Sast.a_expr =
 
 let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   match e with
-  | Constant(c) -> annotate_const c
+    Constant(c) -> annotate_const c
   | Id(i, s) ->
      (match find_variable_type env e with
       | Some(x) -> AId(i, s, x)
@@ -135,7 +107,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
      and ae2 = annotate_expr e2 env in
       (match op with
         | Add | Sub | Mult | Div
-        | Neq | Lt | Leq | Gt | Geq ->
+        | Lt | Leq | Gt | Geq ->
            (let a = require_int_float
                       ae1
                       "left operand must be either integer or float" and
@@ -149,8 +121,8 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
           ignore (require_bool ae1 "left operand must be a bool");
           ignore (require_bool ae2 "right operand must be a bool");
           ABinop(ae1, op, ae2, TBool)
-        | _ ->
-          if not (weak_eq_type (type_of ae1) (type_of ae2)) then
+        | _ -> (* Equal | Neq *)
+          if not (type_of ae1 = type_of ae2) then
           failwith "Type mismatch in comparison" else
           ABinop(ae1, op, ae2, TBool))
   | Assign(e1, e2) ->
@@ -187,10 +159,36 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
                             | _ -> failwith "Bad list access"
 
 
-(* let annotate_prog (p : Ast.program ) : Sast.t_program =
-    let env  = create_env() in
-    annotate_recipes p env
-    annotate_stages p env
+let rec annotate_stmt (s : Ast.stmt) (env : environment) : Sast.a_stmt =
+  match s with
+    Expr(e) -> AExpr(annotate_expr e env)
+  | Block(e_list) -> ABlock(List.map (fun e -> annotate_expr e env) e_list)
+  | If(e, s1, s2) -> let ae = annotate_expr e env in
+                     if require_bool ae "Non-bool expression in if statement"
+                     then AIf(ae,
+                              annotate_stmt s1 env,
+                              annotate_stmt s2 env)
+                     else failwith "Impossible case in AIf"
 
 
- *)
+let annotate_stage (s : Ast.stage) (env : environment) : Sast.a_stage =
+  let new_env = { global_scope = env.global_scope;
+                  local_scope = { variables = []; }; } in
+  { sname = s.sname;
+    body = List.map (fun stmt -> annotate_stmt stmt new_env) s.body;
+    is_start = s.is_start; }
+
+
+let annotate_recipe (r : Ast.recipe) : Sast.a_recipe =
+  let new_env = { global_scope = { variables = []; };
+                  local_scope = { variables = []; }; } in
+  { rname = r.rname;
+    formals = r.formals;
+    body = List.map (fun stage -> annotate_stage stage new_env) r.body; }
+
+
+let annotate_program (p : Ast.program) : Sast.a_program =
+  let new_env = { global_scope = { variables = []; };
+                  local_scope = { variables = []; }; } in
+  { recipes = List.map annotate_recipe p.recipes;
+    stages = List.map (fun stage -> annotate_stage stage new_env) p.stages; }

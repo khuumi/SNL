@@ -31,7 +31,6 @@ type stmt =
 
 type stage = {
     sname: string;        (* Name of the stage. *)
-    locals: string list;  (* Locally defined variables. *)
     body: stmt list;      (* The statements that comprise the stage. *)
     is_start: bool;       (* Whether the stage is a start stage. *)
 }
@@ -40,7 +39,6 @@ type recipe = {
     rname: string;         (* Name of the recipe. *)
     formals: string list;  (* Formal argument names. *)
     body: stage list;      (* Stages in the recipe's scope. *)
-    globals: string list;  (* Variables global inside the recipe. *)
 }
 
 type program = {
@@ -111,16 +109,14 @@ let rec stmt_s = function
 let stage_s s =
   "{ sname = \"" ^ s.sname ^ "\"\n" ^
     "   is_start = " ^ string_of_bool s.is_start ^ "\n" ^
-      "   locals = [" ^ String.concat ", " s.locals ^ "]\n" ^
-        "   body = [" ^ String.concat ",\n" (List.map stmt_s s.body) ^
-          "]}\n"
+      "   body = [" ^ String.concat ",\n" (List.map stmt_s s.body) ^
+        "]}\n"
 
 let recipe_s r =
   "{ rname = \"" ^ r.rname ^ "\"\n" ^
     "   formals = [" ^ String.concat ", " r.formals ^ "]\n" ^
-      "   globals = [" ^ String.concat ", " r.globals ^ "]\n" ^
-        "   body = [" ^ String.concat ",\n" (List.map stage_s r.body) ^
-          "]}\n"
+      "   body = [" ^ String.concat ",\n" (List.map stage_s r.body) ^
+        "]}\n"
 
 let program_s prog =
   "recipes = [" ^ String.concat ",\n" (List.map recipe_s prog.recipes) ^

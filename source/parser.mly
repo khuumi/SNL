@@ -139,11 +139,9 @@ stage_body:
 
 stage:
     ID COLON NEWLINE stage_body DONE       { { sname = $1;
-                                               locals = [];
                                                body = List.rev $4;
                                                is_start = false } }
   | START ID COLON NEWLINE stage_body DONE { { sname = $2;
-                                               locals = [];
                                                body = List.rev $5;
                                                is_start = true } }
 
@@ -161,12 +159,10 @@ stage_seq:
 recipe:
     RECIPE ID COLON stage_seq DONE                { { rname = $2;
                                                       formals = [];
-                                                      body = List.rev $4;
-                                                      globals = [] } }
+                                                      body = List.rev $4; } }
   | RECIPE ID TO formal_list COLON stage_seq DONE { { rname = $2;
                                                       formals = List.rev $4;
-                                                      body = List.rev $6;
-                                                      globals = [] } }
+                                                      body = List.rev $6; } }
 
 
 program:

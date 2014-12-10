@@ -1,6 +1,5 @@
 recipes = [],
 stages = [{ sname = "some_stage"
    is_start = true
-   locals = []
    body = [Expr (Int 5)]}
 ]

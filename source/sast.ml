@@ -28,7 +28,24 @@ type a_expr =
   | ACall of string * a_expr list * t
   | AAccess of int * a_expr * t
 
-(* type t_program = {
-    t_recipes = t_recipe list
-    t_stage  = t_stage list
-} *)
+type a_stmt =
+    AExpr of a_expr
+  | ABlock of a_expr list
+  | AIf of a_expr * a_stmt * a_stmt
+
+type a_stage = {
+    sname: string;        (* Name of the stage. *)
+    body: a_stmt list;    (* The annotated statements in the stage. *)
+    is_start: bool;       (* Whether the stage is a start stage. *)
+}
+
+type a_recipe = {
+    rname: string;         (* Name of the recipe. *)
+    formals: string list;  (* Formal argument names. *)
+    body: a_stage list;      (* Stages in the recipe's scope. *)
+}
+
+type a_program = {
+    recipes: a_recipe list;
+    stages: a_stage list;
+}

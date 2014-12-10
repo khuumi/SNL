@@ -6,7 +6,7 @@ let whitespace = [' ' '\t' '\r']
 
 rule tokenize = parse
   (* Whitespace we split on. *)
-  | whitespace { tokenize lexbuf }
+    whitespace { tokenize lexbuf }
 
   (* Comments. *)
   | "#"      { comment lexbuf }
@@ -74,13 +74,13 @@ rule tokenize = parse
 
 (* Comments do not nest and are only single-line. *)
 and comment = parse
-  | "\n" { tokenize lexbuf }
+    "\n" { tokenize lexbuf }
   | _    { comment lexbuf }
 
 (* Read in string literals. The code is from
 https://realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html *)
 and read_string buf = parse
-  | '"'       { STRING(Buffer.contents buf) }
+    '"'       { STRING(Buffer.contents buf) }
   | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
   | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
   | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
