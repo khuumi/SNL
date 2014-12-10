@@ -1,0 +1,34 @@
+start example_program:
+	lst is [3, 4.2, "hello", 1<2]
+	# if return type is list then will this cause issues?
+	# need to have it infer same information as above
+	# number of elements, type of each element
+
+	changedlst is do rotate_list to lst
+	do show to lst
+	do show to changedlst
+
+recipe rotate_list to my_list:
+
+	# this is a copy of my_list
+	# actual changes are only saved with
+	start start_rotate_list:
+		length is do get_len to my_list
+		index is 0
+		old is index of my_list
+		next loop_start
+
+	loop_start:
+		if index < length-1
+		(next s_list_modifier)
+		else (
+		0 of my_list is old
+		return my_list)
+
+	s_list_modifier:
+		temp is index+1 of my_list
+		index+1 of my_list is old
+		old is temp
+		index is index + 1
+		next loop_start
+done
