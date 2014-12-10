@@ -25,7 +25,7 @@ let type_of_const (ac : Sast.a_constant) : Sast.t =
 let rec type_of (ae : Sast.a_expr) : Sast.t =
   match ae with
     AConstant(const) -> type_of_const const
-  | AId(_,_, t) -> t
+  | AId(_, _, t) -> t
   | AUnop(_, _, t) -> t
   | ABinop(_, _, _, t) -> t
   | AAssign(expr) -> type_of expr
