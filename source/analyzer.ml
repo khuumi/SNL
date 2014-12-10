@@ -158,9 +158,13 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
       | Id(str, scope) -> let ae2 = annotate_expr e2 env in
                           mutate_or_add env e1 (type_of ae2);
                           AAssign(ae2)
-      | Access(index, id) -> let ae2 = annotate_expr e2 env in ae2
+      | Access(index, id) -> let ae2 = annotate_expr e2 env in
+                             (match find_variable_type env id with
+                              | Some(TList(t_arr)) ->
+                                 t_arr.(index) <- type_of ae2;
+                                 AAssign(ae2)
+                              | _ -> failwith "Variable not found")
       | _ -> failwith "Invalid assignment operation")
-     (* ADD: add the case where the left is an array access *)
   | Next(s) -> ANext(s, TOCamlString)
   | Return(e) -> let ae = annotate_expr e env in
                  AReturn(ae, type_of ae)
@@ -174,19 +178,12 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
                                        (fun e-> annotate_expr e env)
                                        e_list in
                        ACall(s, ae_list, TUnknown)
-  | Access(index, id) -> let l = match id with
-                           | Id(str, Local) -> find_variable_type
-                                                 env
-                                                 id
-                           | Id(str, Global) -> find_variable_type
-                                                  env
-                                                  id
-                           | _ -> failwith "Bad list access"
+  | Access(index, id) -> let l = find_variable_type env id
                          in match l with
-                            | Some(TList(e_arr)) ->
+                            | Some(TList(t_arr)) ->
                                AAccess(index,
                                        (annotate_expr id env),
-                                       e_arr.(index))
+                                       t_arr.(index))
                             | _ -> failwith "Bad list access"
 
 
