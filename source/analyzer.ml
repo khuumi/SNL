@@ -13,6 +13,16 @@ type environment = {
     local_scope : symbol_table;
 }
 
+(* IR for recipe structure *)
+type jchecked_recipe = {
+    rname: string;
+    formals: (string * t) list;
+    body: a_stage list;
+    return_type: t;
+    is_called: bool;
+}
+
+let jcheck_recipe_list = []
 
 let type_of_const (ac : Sast.a_constant) : Sast.t =
   match ac with
@@ -36,6 +46,9 @@ let rec type_of (ae : Sast.a_expr) : Sast.t =
   | ACall(_, _, t) -> t
   | AAccess(_, _, t) -> t
 
+let jcheck_recipe (s : string) (ae_lst : Sast.a_expr list) =
+        s
+    
 
 let find_variable_type (env : environment) (id : Ast.expr) :
       Sast.t option =
@@ -149,6 +162,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | Call(s, e_list) -> let ae_list = List.map
                                        (fun e-> annotate_expr e env)
                                        e_list in
+                        let jcheck = jcheck_recipe s ae_list in
                        ACall(s, ae_list, TUnknown)
   | Access(index, id) -> let l = find_variable_type env id
                          in match l with
@@ -157,7 +171,6 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
                                        (annotate_expr id env),
                                        t_arr.(index))
                             | _ -> failwith "Bad list access"
-
 
 let rec annotate_stmt (s : Ast.stmt) (env : environment) : Sast.a_stmt =
   match s with
@@ -185,7 +198,6 @@ let annotate_recipe (r : Ast.recipe) : Sast.a_recipe =
   { rname = r.rname;
     formals = r.formals;
     body = List.map (fun stage -> annotate_stage stage new_env) r.body; }
-
 
 let annotate_program (p : Ast.program) : Sast.a_program =
   let new_env = { global_scope = { variables = []; };

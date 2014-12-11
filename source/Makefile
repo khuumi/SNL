@@ -1,5 +1,5 @@
 ast_test: objects java ast
-	ocamlc -o snl_ast ast.cmo parser.cmo scanner.cmo codegen.cmo snl_ast.cmo
+	ocamlc -o snl_ast ast.cmo parser.cmo scanner.cmo codegen.cmo analyzer.cmo snl_ast.cmo
 
 ast: snl_ast.ml
 	ocamlc -c snl_ast.ml
