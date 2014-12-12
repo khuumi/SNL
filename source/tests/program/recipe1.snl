@@ -1,0 +1,5 @@
+recipe some_recipe:
+start some_stage:
+5
+done
+done

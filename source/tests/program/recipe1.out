@@ -1,0 +1,8 @@
+recipes = [{ rname = "some_recipe"
+   formals = []
+   body = [{ sname = "some_stage"
+   is_start = true
+   body = [Expr (Int 5)]}
+]}
+],
+stages = []

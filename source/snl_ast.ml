@@ -41,7 +41,7 @@ let get_ast : Ast.program =
 
 
 let _ =
-  let action = if Array.length Sys.argv > 2
+  let action = if Array.length Sys.argv > 1
                then List.assoc Sys.argv.(1) [("-e", Expr);
                                              ("-s", Stmt);
                                              ("-p", Program);

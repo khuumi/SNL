@@ -35,7 +35,12 @@ def run_ast_tests(files, cmd_arg):
         with open(test.replace('.snl', '.out'), 'r') as f:
             expected_output = f.read()
         with open(test, 'r') as f:
-            output = subprocess.check_output([AST_BIN, cmd_arg], stdin=f)
+            try:
+                output = subprocess.check_output([AST_BIN, cmd_arg], stdin=f)
+            except subprocess.CalledProcessError as e:
+                print 'Error processing %s\n' % test, e
+                TOTAL_FAIL += 1
+                continue
         if expected_output != output:
             TOTAL_FAIL += 1
             print '\nFAIL: %s' % test

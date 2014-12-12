@@ -54,7 +54,7 @@ constant:
 
 /* Ids may be local or global. */
 ids:
-    ID { Id($1, Global) }
+    ID       { Id($1, Global) }
   | LOCAL ID { Id($2, Local) }
 
 
@@ -77,11 +77,11 @@ expr:
 
 /* Mathematical expressions. */
 math:
-    expr PLUS   expr         { Binop($1, Add, $3) }
-  | expr MINUS  expr         { Binop($1, Sub, $3) }
-  | expr TIMES  expr         { Binop($1, Mult, $3) }
-  | expr DIVIDE expr         { Binop($1, Div, $3) }
-  | MINUS expr %prec UMINUS  { Unop(Negate, $2) }
+    expr PLUS   expr        { Binop($1, Add, $3) }
+  | expr MINUS  expr        { Binop($1, Sub, $3) }
+  | expr TIMES  expr        { Binop($1, Mult, $3) }
+  | expr DIVIDE expr        { Binop($1, Div, $3) }
+  | MINUS expr %prec UMINUS { Unop(Negate, $2) }
 
 
 /* Boolean expressions. */
@@ -120,9 +120,9 @@ stmt:
     expr NEWLINE { Expr($1) }
   | IF expr NEWLINE LPAREN block_builder RPAREN NEWLINE
     ELSE opt_nl LPAREN block_builder RPAREN
-       { If($2, Block(List.rev $5), Block(List.rev $11)) }
+      { If($2, Block(List.rev $5), Block(List.rev $11)) }
   | IF expr NEWLINE LPAREN block_builder RPAREN %prec NOELSE
-       { If($2, Block(List.rev $5), Block([])) }
+      { If($2, Block(List.rev $5), Block([])) }
 
 
 /* A block is a sequence of expr separated by newlines that appears in an
@@ -157,18 +157,22 @@ stage_seq:
 
 
 recipe:
-    RECIPE ID COLON stage_seq DONE                { { rname = $2;
-                                                      formals = [];
-                                                      body = List.rev $4; } }
-  | RECIPE ID TO formal_list COLON stage_seq DONE { { rname = $2;
-                                                      formals = List.rev $4;
-                                                      body = List.rev $6; } }
+    RECIPE ID COLON NEWLINE
+    stage_seq opt_nl DONE
+      { { rname = $2;
+          formals = [];
+          body = List.rev $5; } }
+  | RECIPE ID TO formal_list COLON NEWLINE
+    stage_seq opt_nl DONE
+      { { rname = $2;
+          formals = List.rev $4;
+          body = List.rev $7; } }
 
 
 program:
-    /* nothing */  { { recipes = [];
-                       stages = [] } }
-  | program stage  { { recipes = $1.recipes;
-                       stages = $2 :: $1.stages } }
-  | program recipe { { recipes = $2 :: $1.recipes;
-                       stages = $1.stages } }
+    /* nothing */         { { recipes = [];
+                              stages = [] } }
+  | program stage opt_nl  { { recipes = $1.recipes;
+                              stages = $2 :: $1.stages } }
+  | program recipe opt_nl { { recipes = $2 :: $1.recipes;
+                              stages = $1.stages } }
