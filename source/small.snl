@@ -1,0 +1,9 @@
+recipe inc to num:
+    start calc:
+        return num + 1
+done
+done 
+start stage:
+    i is 1
+    i is do inc
+done
