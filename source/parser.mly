@@ -54,7 +54,7 @@ constant:
 
 /* Ids may be local or global. */
 ids:
-    ID { Id($1, Global) }
+    ID       { Id($1, Global) }
   | LOCAL ID { Id($2, Local) }
 
 
@@ -77,11 +77,11 @@ expr:
 
 /* Mathematical expressions. */
 math:
-    expr PLUS   expr         { Binop($1, Add, $3) }
-  | expr MINUS  expr         { Binop($1, Sub, $3) }
-  | expr TIMES  expr         { Binop($1, Mult, $3) }
-  | expr DIVIDE expr         { Binop($1, Div, $3) }
-  | MINUS expr %prec UMINUS  { Unop(Negate, $2) }
+    expr PLUS   expr        { Binop($1, Add, $3) }
+  | expr MINUS  expr        { Binop($1, Sub, $3) }
+  | expr TIMES  expr        { Binop($1, Mult, $3) }
+  | expr DIVIDE expr        { Binop($1, Div, $3) }
+  | MINUS expr %prec UMINUS { Unop(Negate, $2) }
 
 
 /* Boolean expressions. */
@@ -170,9 +170,9 @@ recipe:
 
 
 program:
-    /* nothing */  { { recipes = [];
-                       stages = [] } }
-  | program stage  { { recipes = $1.recipes;
-                       stages = $2 :: $1.stages } }
-  | program recipe { { recipes = $2 :: $1.recipes;
-                       stages = $1.stages } }
+    /* nothing */         { { recipes = [];
+                              stages = [] } }
+  | program stage opt_nl  { { recipes = $1.recipes;
+                              stages = $2 :: $1.stages } }
+  | program recipe opt_nl { { recipes = $2 :: $1.recipes;
+                              stages = $1.stages } }
