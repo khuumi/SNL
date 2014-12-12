@@ -1,0 +1,11 @@
+recipes = [{ rname = "some_recipe"
+   formals = []
+   body = [{ sname = "some_stage"
+   is_start = true
+   body = [Expr (Int 5)]}
+]}
+],
+stages = [{ sname = "another_stage"
+   is_start = true
+   body = [Expr (Float 6.9)]}
+]

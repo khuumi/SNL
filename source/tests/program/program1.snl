@@ -1,0 +1,40 @@
+recipe some_recipe:
+
+
+
+start some_stage:
+
+
+
+
+5
+
+
+done
+
+
+
+
+
+
+
+done
+
+
+
+
+start another_stage:
+
+
+6.9
+
+
+
+
+done
+
+
+
+
+
+
