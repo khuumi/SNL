@@ -39,8 +39,6 @@ let print_const (const : a_constant) (filename : string) =
 let print_id (s : string) (scope : Ast.scope) (file_name : string) =
     write_out file_name "ID"
 
-
-
     
 let rec print_expr (expr : a_expr) (filename : string) =
     match expr with
@@ -52,8 +50,8 @@ let rec print_expr (expr : a_expr) (filename : string) =
   | ANext(_, t) -> write_out filename "a next expression"
   | AReturn(_, t) -> write_out filename "a return statement"
   | AList(_, t) -> write_out filename "a list"
-  | AInput(t) -> write_out filename "an input"
-  | ACall(_, _, t) -> write_out filename "a call"
+  | AInput(t) -> write_out filename "bogus"
+  | ACall(s, e_list, t) -> print_func_call s e_list filename
   | AAccess(_, _, t) -> write_out filename "n access"
 
   and print_binop (e1 : a_expr) (e2 : a_expr) (op : Ast.op) (filename : string) = 
@@ -85,6 +83,16 @@ let rec print_expr (expr : a_expr) (filename : string) =
       let output = "." ^ string_op ^ "()" in 
       print_expr e file_name;
       write_out file_name output
+
+  and print_func_call (s : string) (e_list : a_expr list) (file_name : string) = 
+     match s with 
+    | "show" -> write_out file_name "System.out.println("; 
+                ignore (List.map (fun e -> print_expr e file_name; 
+                                        write_out file_name " + "; 
+                                        write_out file_name "\"\")") e_list)
+            
+    | _ -> write_out file_name "NOT SUPPORTED CALL"
+
 
 let rec print_stmt (statement : a_stmt) (filename : string) =
     match statement with
