@@ -7,6 +7,7 @@ start example_program:
 	changedlst is do rotate_list to lst
 	do show to lst
 	do show to changedlst
+done
 
 recipe rotate_list to my_list:
 
@@ -17,6 +18,7 @@ recipe rotate_list to my_list:
 		index is 0
 		old is index of my_list
 		next loop_start
+	done
 
 	loop_start:
 		if index < length-1
@@ -24,6 +26,7 @@ recipe rotate_list to my_list:
 		else (
 		0 of my_list is old
 		return my_list)
+	done
 
 	s_list_modifier:
 		temp is index+1 of my_list
@@ -31,4 +34,5 @@ recipe rotate_list to my_list:
 		old is temp
 		index is index + 1
 		next loop_start
+	done
 done
