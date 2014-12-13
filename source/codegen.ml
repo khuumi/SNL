@@ -50,7 +50,7 @@ let rec print_expr (expr : a_expr) (filename : string) =
   | AAssign(e1) -> write_out filename "An assignment"
   | ANext(s, t) -> let next = s ^ "()" in write_out filename next
   | AReturn(_, t) -> write_out filename "a return statement"
-  | AList(_, t) -> write_out filename "a list"
+  | AList(e_list, t) -> write_out filename "list"(*print_list e_list filename*)
   | AInput(t) -> write_out filename "new SNLObject(input.nextLine(), \"string\")" 
   | ACall(s, e_list, t) -> print_func_call s e_list filename
   | AAccess(_, _, t) -> write_out filename "n access"
@@ -91,12 +91,19 @@ let rec print_expr (expr : a_expr) (filename : string) =
                 ignore (List.map (fun e -> print_expr e file_name; 
                                         write_out file_name " + "; 
                                         write_out file_name "\"\")") e_list)
-            
-    | _ -> let call =  "do " ^ s ^ " to ... INCOMPLETE" in
+            (* INCOMPLETE *)
+    | _ -> let call =  "do " ^ s ^ " to ... INCOMPLETE" in(*
+            let str_list = List.fold_left 
+                (fun a b -> let next = "new SNLObject("")"b::a)*)
             write_out file_name call(*
             ignore (List.map (fun e count -> print_expr e file_name;
                                     write_out*)
 
+            (* INCOMPLETE *)(*
+  and print_list (e_list : a_expr list) (file_name : string) =
+      let init_list = "new SNLObject(\"list\", " in
+      write_out file_name init_list*)
+      
 
 
 let rec print_stmt (statement : a_stmt) (filename : string) =
