@@ -3,24 +3,24 @@ open Analyzer
 type action = Expr | Stmt | Program | Java
 
 (*fake recipe start*)
-let add : Ast.op = 
+let add : Ast.op =
         Add
 
 let mynum : Ast.constant =
         Int(1)
 
-let binop_expr : Ast.expr = 
+let binop_expr : Ast.expr =
         Binop(Constant(mynum), add, Constant(Int(1)))
-let return_expr : Ast.expr = 
+let return_expr : Ast.expr =
         Return(binop_expr)
 
-let increment : Ast.stmt = 
+let increment : Ast.stmt =
         Expr(return_expr)
 
 let calc : Ast.stage =
         {sname = "calc"; body =[increment] ; is_start = true}
-let fake_recipe : Ast.recipe = 
-        {rname = "inc"; formals = ["num"]; body = [calc];} 
+let fake_recipe : Ast.recipe =
+        {rname = "inc"; formals = ["num"]; body = [calc];}
 (*fake recipe end*)
 
 (*fake stage start*)
@@ -55,6 +55,6 @@ let _ =
                                (Parser.program Scanner.tokenize lexbuf))
   | Java ->
                   let sast = Analyzer.annotate_program get_ast in
-                 (*let sast = (Analyzer.annotate_program 
+                 (*let sast = (Analyzer.annotate_program
                                (Parser.program Scanner.tokenize lexbuf)) in*)
-    Codegen.start_gen sast Sys.argv.(2)
+    ignore (Codegen.start_gen sast Sys.argv.(2))
