@@ -5,7 +5,7 @@ public class SNLObject{
     // all of the different meta data available for Object wrapper
     private String type;
     private int valueInt;
-    private float valueFloat;
+    private double valueFloat;
     private boolean valueBool;
     private String valueString;
     private ArrayList<SNLObject> valueList;
@@ -24,7 +24,7 @@ public class SNLObject{
     }
 
     // constructor for float object
-    public SNLObject(float vFloat, String t){
+    public SNLObject(double vFloat, String t){
         type = t;
         valueFloat = vFloat;
     }
@@ -42,9 +42,9 @@ public class SNLObject{
     }
 
     // constructor for list object
-    public SNLObject(ArrayList<SNLObject> vList, String t){
+    public SNLObject(String t){
         type = t;
-        valueList = vList;
+        valueList = new ArrayList<SNLObject>();
     }
 
     // copy constructor
@@ -56,7 +56,8 @@ public class SNLObject{
         if(t.equals(floatName)){valueFloat = old.getFloat();}
         if(t.equals(boolName)){valueBool = old.getBool();}
         if(t.equals(stringName)){valueString = old.getString();}
-        if(t.equals(listName)){valueList = old.getAL();}
+        if(t.equals(listName)){valueList = new 
+            ArrayList<SNLObject>(old.getAL());}
     }
 
     // getter methods for private data
@@ -69,7 +70,7 @@ public class SNLObject{
         return valueInt;
     }
 
-    private float getFloat(){
+    private double getFloat(){
         return valueFloat;
     }
 
@@ -544,22 +545,22 @@ public class SNLObject{
     }
 
     // this is to get from the list
-    public SNLObject access(int index){
+    public SNLObject access(SNLObject index){
 
         SNLObject snlo = null;
 
         if(type.equals(listName))
-            snlo = valueList.get(index);          
+            snlo = valueList.get(index.getInt());          
         
         // return is null if something went wrong at runtime
         return snlo;
     }
 
     // this is to set an element in the list
-    public void set(int index, SNLObject obj){
+    public void set(SNLObject index, SNLObject obj){
 
         if(type.equals(listName))
-            valueList.set(index, obj);          
+            valueList.set(index.getInt(), obj);          
 
     }
 
@@ -570,12 +571,17 @@ public class SNLObject{
             valueList.add(obj);   
     }
 
+    // get the length of the list
+    public SNLObject length(){
+        return new SNLObject(valueList.size(), "int");
+    }
+
     public String toString(){
 
         String t = getType();
 
         if(t.equals(intName)){return Integer.toString(getInt());}
-        if(t.equals(floatName)){return Float.toString(getFloat());}
+        if(t.equals(floatName)){return Double.toString(getFloat());}
         if(t.equals(boolName)){return Boolean.toString(getBool());}
         if(t.equals(stringName)){return getString();}
         if(t.equals(listName)){
@@ -583,9 +589,9 @@ public class SNLObject{
             String s = "[ ";
             
             for(int i=0; i<valueList.size()-1; i++){
-                s = getAL().get(i).toString() + ", ";
+                s = s + getAL().get(i).toString() + ", ";
             }
-            s = s + getAL().get(valueList.size()).toString() + " ]";
+            s = s + getAL().get(valueList.size()-1).toString() + " ]";
             
             return s;
         }
