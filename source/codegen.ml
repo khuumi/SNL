@@ -33,7 +33,7 @@ let print_const (const : a_constant) (filename : string) =
        AInt(num, _) -> " new SNLObject("^ (string_of_int num) ^", \"int\")"                 
      | AFloat(fl, _) ->" new SNLObject("^ (string_of_float fl) ^", \"float\")"
      | ABool(b, _) -> " new SNLObject("^  (string_of_bool b) ^", \"bool\")"
-     | AString(s, _) ->" new SNLObject(" ^ s ^ ", \"string\")"
+     | AString(s, _) ->" new SNLObject(\"" ^ s ^ "\", \"string\")"
   
   in write_out filename out
 
@@ -48,7 +48,7 @@ let rec print_expr (expr : a_expr) (filename : string) =
   | AUnop(op, e, _) -> print_unop e op filename 
   | ABinop(e1, op, e2 , t) -> print_binop e1 e2 op filename
   | AAssign(e1) -> write_out filename "An assignment"
-  | ANext(_, t) -> write_out filename "a next expression"
+  | ANext(s, t) -> let next = s ^ "()" in write_out filename next
   | AReturn(_, t) -> write_out filename "a return statement"
   | AList(_, t) -> write_out filename "a list"
   | AInput(t) -> write_out filename "new SNLObject(input.nextLine(), \"string\")" 
@@ -92,7 +92,11 @@ let rec print_expr (expr : a_expr) (filename : string) =
                                         write_out file_name " + "; 
                                         write_out file_name "\"\")") e_list)
             
-    | _ -> write_out file_name "NOT SUPPORTED CALL"
+    | _ -> let call =  "do " ^ s ^ " to ... INCOMPLETE" in
+            write_out file_name call(*
+            ignore (List.map (fun e count -> print_expr e file_name;
+                                    write_out*)
+
 
 
 let rec print_stmt (statement : a_stmt) (filename : string) =
@@ -116,8 +120,7 @@ let print_stage (stage : a_stage) (file_name : string) =
     List.map  (fun body -> print_stmt body file_name) stage.body;
     write_out file_name "}"
 
-let start_gen (sast : a_program) (file_name : string) =
-    let name =  String.sub file_name 0 ((String.length file_name) - 4) in
+let start_gen (sast : a_program) (name : string) =
     make_header name false;
     List.map (fun stage -> print_stage stage name) sast.stages;    
     write_out name "}";
