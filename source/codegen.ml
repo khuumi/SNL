@@ -49,7 +49,7 @@ let rec print_expr (expr : a_expr) (filename : string) =
   | ABinop(e1, op, e2 , t) -> print_binop e1 e2 op filename
   | AAssign(e1) -> write_out filename "An assignment"
   | ANext(s, t) -> let next = s ^ "()" in write_out filename next
-  | AReturn(_, t) -> write_out filename "a return statement"
+  | AReturn(e, t) -> print_return e filename
   | AList(_, t) -> write_out filename "a list"
   | AInput(t) -> write_out filename "new SNLObject(input.nextLine(), \"string\")" 
   | ACall(s, e_list, t) -> print_func_call s e_list filename
@@ -97,7 +97,9 @@ let rec print_expr (expr : a_expr) (filename : string) =
             ignore (List.map (fun e count -> print_expr e file_name;
                                     write_out*)
 
-
+and print_return (e : a_expr) (file_name : string) =
+    write_out file_name "return ";
+    print_expr e file_name
 
 let rec print_stmt (statement : a_stmt) (filename : string) =
     match statement with
