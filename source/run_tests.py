@@ -2,6 +2,7 @@
 
 import argparse
 import glob
+import os
 import subprocess
 
 
@@ -82,10 +83,34 @@ def run_program_tests():
     print 'Finished running program tests.\n'
 
 
+def run_failing_tests():
+    """
+    Runs all the tests in the tests/failing directory.
+    """
+    global TOTAL_PASS
+    global TOTAL_FAIL
+    print 'Running failing tests...'
+    failing_tests = glob.glob('tests/failing/*.snl')
+    with open(os.devnull, 'wb') as DEVNULL:
+        for test in failing_tests:
+            with open(test, 'r') as f:
+                try:
+                    output = subprocess.check_output([AST_BIN, '-p'],
+                                                     stdin=f,
+                                                     stderr=DEVNULL)
+                    print '\nFAIL: %s' % test
+                    TOTAL_FAIL += 1
+                except subprocess.CalledProcessError:
+                    TOTAL_PASS += 1
+                    if args.v:
+                        print 'PASS: %s' % test
+
+
 def main():
     run_expr_tests()
     run_stmt_tests()
     run_program_tests()
+    run_failing_tests()
     print '%d out of %d tests passing.' % (TOTAL_PASS, TOTAL_PASS + TOTAL_FAIL)
 
 
