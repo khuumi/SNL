@@ -1,0 +1,2 @@
+start print_stage:
+do show to "Hello, world!"
