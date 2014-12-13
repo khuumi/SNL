@@ -11,8 +11,8 @@ let write_out (filename : string) (buffer : string) =
 
     fprintf file "%s" buffer
 
-let get_initial_stage_header (filename : string) =
-    "{\n public static void main(String args[]){\n" ^filename ^ "();\n}\n"
+let get_initial_stage_header (start_stage_name : string) =
+    "{\n public static void main(String args[]){\n" ^start_stage_name ^ "();\n}\n"
 
 let make_header (filename : string) (is_recipe : bool) =
     match is_recipe with
@@ -21,15 +21,15 @@ let make_header (filename : string) (is_recipe : bool) =
   | false -> let header = "public class " ^ filename ^ "{\n" in  write_out
         filename header
 
-
-
-
 let print_const (const : a_constant) (filename : string) =
+    let out = 
     match const with
-    AInt(num, _) -> let output = string_of_int num in write_out filename output
-  | AFloat(fl, _) -> let output = string_of_float fl in write_out filename output
-  | ABool(b, _) -> let output = string_of_bool b in write_out filename output
-  | AString(s, _) -> write_out filename s
+       AInt(num, _) -> " new SNLObject("^ (string_of_int num) ^"\"int\")"                 
+     | AFloat(fl, _) ->" new SNLObject("^ (string_of_float fl) ^"\"float\")"
+     | ABool(b, _) -> " new SNLObject("^  (string_of_bool b) ^"\"bool\")"
+     | AString(s, _) ->" new SNLObject(" ^ s ^ "\"string\")"
+  
+  in write_out filename out
 
 let print_expr (expr : a_expr) (filename : string) =
     match expr with
@@ -57,15 +57,15 @@ let rec print_stmt (statement : a_stmt) (filename : string) =
      print_stmt second_stmt;
      write_out filename "}"
 
-let print_stage (stage : a_stage) (filename : string) =
-    let header = "private static void " ^ filename ^ "(){\n" in
+let print_stage (stage : a_stage) (file_name : string) =
+    let header = "private static void " ^ stage.sname ^ "(){\n" in
     let initial_header = match stage.is_start with
-        true -> get_initial_stage_header filename
+        true -> get_initial_stage_header stage.sname
       | false -> ""
-    in write_out filename (initial_header ^ header);
+    in write_out file_name (initial_header ^ header);
     (*  print_string initial_header ^ header; *)
-    List.map  (fun body -> print_stmt body filename) stage.body;
-    write_out filename "}"
+    List.map  (fun body -> print_stmt body file_name) stage.body;
+    write_out file_name "}"
 
 let start_gen (sast : a_program) (filename : string) =
     let name =  String.sub filename 0 ((String.length filename) - 4) in
