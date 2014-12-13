@@ -7,7 +7,6 @@ open Ast
 
 
 let write_out (filename : string) (buffer : string) =
-    print_string "write_out_called";
     let file = (open_out_gen [Open_creat; Open_wronly;
     Open_text; Open_append] 0o666
     ("java/" ^ filename ^ ".java")) in
@@ -20,10 +19,12 @@ let get_initial_stage_header (start_stage_name : string) =
     "\n public static void main(String args[]){\n" ^start_stage_name ^ "();\n}\n"
 
 let make_header (filename : string) (is_recipe : bool) =
+    let scanner = "import java.util.Scanner;\n" in 
+    let scanner2 = "private static Scanner input = new Scanner(System.in);" in 
     match is_recipe with
-    true -> let header = "public final class " ^ filename ^ "{\n public static
-        void perform(){\n" in  write_out filename header
-  | false -> let header = "public class " ^ filename ^ "{\n" in  write_out
+    true -> let header = scanner ^ "public final class " ^ filename ^ "{"
+    ^ scanner2 ^ "\n public static void perform(){\n" in  write_out filename header
+  | false -> let header = scanner ^ "public class " ^ filename ^ "{\n"  ^ scanner2 in write_out
         filename header
 
 let print_const (const : a_constant) (filename : string) =
@@ -50,7 +51,7 @@ let rec print_expr (expr : a_expr) (filename : string) =
   | ANext(_, t) -> write_out filename "a next expression"
   | AReturn(_, t) -> write_out filename "a return statement"
   | AList(_, t) -> write_out filename "a list"
-  | AInput(t) -> write_out filename "bogus"
+  | AInput(t) -> write_out filename "new SNLObject(input.nextLine(), \"string\")" 
   | ACall(s, e_list, t) -> print_func_call s e_list filename
   | AAccess(_, _, t) -> write_out filename "n access"
 
@@ -86,7 +87,7 @@ let rec print_expr (expr : a_expr) (filename : string) =
 
   and print_func_call (s : string) (e_list : a_expr list) (file_name : string) = 
      match s with 
-    | "show" -> write_out file_name "System.out.println("; 
+     "show" -> write_out file_name "System.out.println("; 
                 ignore (List.map (fun e -> print_expr e file_name; 
                                         write_out file_name " + "; 
                                         write_out file_name "\"\")") e_list)
