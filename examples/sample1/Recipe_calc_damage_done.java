@@ -1,34 +1,31 @@
 public final class Recipe_calc_damage_done{
 
-	private static int attack;
-	private static int defense;
+    private static SNLObject attack;
+    private static SNLObject defense;
 
-	// helper wrapper classes needed
-	private static Integer returnInteger;
+    // return value
+    private static SNLObject ret;
 
-	// how to infer return type?
-	// how to tell what types the arguments are?
-	// both of these will come from the SAST data structure
-	public static int perform(int attack_arg, int defense_arg){
-		attack = attack_arg;
-		defense = defense_arg;
+    // how to infer return type?
+    // how to tell what types the arguments are?
+    // both of these will come from the SAST data structure
+    public static SNLObject perform(SNLObject attack_arg, 
+        SNLObject defense_arg){
 
-		// idioms every time return helper is called
-		// need to test with more complex examples
-		returnInteger = null;
-		returnInteger = calc();
-		if(returnInteger == null){
-			// call next helper
-		}
-		return returnInteger.intValue();
-	}
+        // copy constructors because pass by value
+        attack = new SNLObject(attack_arg);
+        defense = new SNLObject(defense_arg);
 
-	private static Integer calc(){
-		if(attack < defense){
-			return new Integer(1);
-		}
-		else{
-			return new Integer(attack - defense);
-		}
-	}
+        calc();
+        return ret;
+    }
+
+    private static void calc(){
+        if(attack.lt(defense).getBool()){
+            ret = new SNLObject(1, "int");
+        }
+        else{
+            ret = attack.sub(defense);
+        }
+    }
 }

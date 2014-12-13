@@ -8,24 +8,27 @@ recipe calc_damage_done to attack, defense:
 		else
 		return attack - defense
 done
+done
 
 recipe does_hit_land to attacker_speed, defender_speed:
 	start calc:
 		return attacker_speed >= defender_speed
 done
+done
 
-Universe:
-Character_HP is 10
-Character_Attack is 10
-Character_Defense is 5
-Character_Speed is 5
-Ogre_HP is 10
-Ogre_Attack is 20
-Ogre_Defense is 5
-Ogre_Speed is 2
-weapon_room_seen is false
+
 
 start dungeon_entrance:
+	Character_HP is 10
+	Character_Attack is 10
+	Character_Defense is 5
+	Character_Speed is 5
+	Ogre_HP is 10
+	Ogre_Attack is 20
+	Ogre_Defense is 5
+	Ogre_Speed is 2
+	weapon_room_seen is false
+	
 	do show to “You are at the entrance of the dungeon. There are three doors in front of you. These are labelled 1, 2, and \”BOSS\”. Enter the label of the door you want to go through. Choose wisely: ”
 	choice is input
 	if choice = 1 and not weapon_room_seen
@@ -40,6 +43,7 @@ next dungeon_entrance)
 	else
 		(do show to “That’s not a valid door label! Try again.”
 		next dungeon_entrance)
+done
 
 weapon_room:
 do show to “You found a shiny sword! +5 attack and -1 speed. You return to the previous room.”
@@ -47,13 +51,16 @@ do show to “You found a shiny sword! +5 attack and -1 speed. You return to the
 	Character_Speed is Character_Speed - 1
 	weapon_room_seen is true
 	next dungeon_entrance
+done
 
 trap_room:
 	do show to “The door closes behind you and never opens again. SADNESS. THE END.”
+done
 
 boss_room_intro:
 	do show to “An ogre appeared!”
 	next boss_room
+done
 
 boss_room:
 	if Character_HP < 1
@@ -92,9 +99,12 @@ else
 	do show to “The ogre hit you inflicting “ + dam + “ damage!”)
 
 next boss_room
+done
 
 character_death:
 	do show to “You died. Sadness. THE END.”
+done
 
 ogre_death:
 	do show to “The ogre died. You win!!! THE END.”
+done
