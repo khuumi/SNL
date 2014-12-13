@@ -1,49 +1,98 @@
 open Printf
 open Sast
+open Ast
 
 (* let get_header = "{\n  public static void main(String args[])\n"
  *)
+
 
 let write_out (filename : string) (buffer : string) =
     let file = (open_out_gen [Open_creat; Open_wronly;
     Open_text; Open_append] 0o666
     ("java/" ^ filename ^ ".java")) in
 
-    fprintf file "%s" buffer
+    fprintf file "%s" buffer;
+    close_out file
+ 
 
 let get_initial_stage_header (start_stage_name : string) =
-    "{\n public static void main(String args[]){\n" ^start_stage_name ^ "();\n}\n"
+    "\n public static void main(String args[]){\n" ^start_stage_name ^ "();\n}\n"
 
 let make_header (filename : string) (is_recipe : bool) =
+    let scanner = "import java.util.Scanner;\n" in 
+    let scanner2 = "private static Scanner input = new Scanner(System.in);" in 
     match is_recipe with
-    true -> let header = "public final class " ^ filename ^ "{\n public static
-        void perform(){\n" in  write_out filename header
-  | false -> let header = "public class " ^ filename ^ "{\n" in  write_out
+    true -> let header = scanner ^ "public final class " ^ filename ^ "{"
+    ^ scanner2 ^ "\n public static void perform(){\n" in  write_out filename header
+  | false -> let header = scanner ^ "public class " ^ filename ^ "{\n"  ^ scanner2 in write_out
         filename header
 
 let print_const (const : a_constant) (filename : string) =
     let out = 
     match const with
-       AInt(num, _) -> " new SNLObject("^ (string_of_int num) ^"\"int\")"                 
-     | AFloat(fl, _) ->" new SNLObject("^ (string_of_float fl) ^"\"float\")"
-     | ABool(b, _) -> " new SNLObject("^  (string_of_bool b) ^"\"bool\")"
-     | AString(s, _) ->" new SNLObject(" ^ s ^ "\"string\")"
+       AInt(num, _) -> " new SNLObject("^ (string_of_int num) ^", \"int\")"                 
+     | AFloat(fl, _) ->" new SNLObject("^ (string_of_float fl) ^", \"float\")"
+     | ABool(b, _) -> " new SNLObject("^  (string_of_bool b) ^", \"bool\")"
+     | AString(s, _) ->" new SNLObject(" ^ s ^ ", \"string\")"
   
   in write_out filename out
 
-let print_expr (expr : a_expr) (filename : string) =
+let print_id (s : string) (scope : Ast.scope) (file_name : string) =
+    write_out file_name "ID"
+
+    
+let rec print_expr (expr : a_expr) (filename : string) =
     match expr with
     AConstant(const) -> print_const const filename
-  | AId(_, _, t) -> write_out filename "An ID"
-  | AUnop(_, _, t) -> write_out filename "A unop"
-  | ABinop(_, _, _, t) -> write_out filename "A binop"
+  | AId(s, scope, _) -> print_id s scope  filename
+  | AUnop(op, e, _) -> print_unop e op filename 
+  | ABinop(e1, op, e2 , t) -> print_binop e1 e2 op filename
   | AAssign(e1) -> write_out filename "An assignment"
   | ANext(_, t) -> write_out filename "a next expression"
   | AReturn(_, t) -> write_out filename "a return statement"
   | AList(_, t) -> write_out filename "a list"
-  | AInput(t) -> write_out filename "an input"
-  | ACall(_, _, t) -> write_out filename "a call"
+  | AInput(t) -> write_out filename "new SNLObject(input.nextLine(), \"string\")" 
+  | ACall(s, e_list, t) -> print_func_call s e_list filename
   | AAccess(_, _, t) -> write_out filename "n access"
+
+  and print_binop (e1 : a_expr) (e2 : a_expr) (op : Ast.op) (filename : string) = 
+    let string_op = 
+        match op with 
+        Add -> "add"
+      | Sub -> "sub"
+      | Mult -> "mult"
+      | Div -> "div"
+      | Equal -> "eq"
+      | Neq -> "neq"
+      | Gt -> "gt"
+      | Geq -> "geq"
+      | Lt -> "lt"
+      | Leq -> "leq" 
+      | And -> "and"
+      | Or -> "or" in 
+    let output = "." ^ string_op ^ "(" in 
+    print_expr e1 filename;
+    write_out filename output;
+    print_expr e2 filename;
+    write_out filename ")"
+
+  and print_unop (e : a_expr) (op : Ast.op) (file_name : string) = 
+      let string_op = 
+          match op with 
+            Negate -> "neg"
+          | Not -> "not" in 
+      let output = "." ^ string_op ^ "()" in 
+      print_expr e file_name;
+      write_out file_name output
+
+  and print_func_call (s : string) (e_list : a_expr list) (file_name : string) = 
+     match s with 
+     "show" -> write_out file_name "System.out.println("; 
+                ignore (List.map (fun e -> print_expr e file_name; 
+                                        write_out file_name " + "; 
+                                        write_out file_name "\"\")") e_list)
+            
+    | _ -> write_out file_name "NOT SUPPORTED CALL"
 
 
 let rec print_stmt (statement : a_stmt) (filename : string) =
@@ -67,8 +116,9 @@ let print_stage (stage : a_stage) (file_name : string) =
     List.map  (fun body -> print_stmt body file_name) stage.body;
     write_out file_name "}"
 
-let start_gen (sast : a_program) (filename : string) =
-    let name =  String.sub filename 0 ((String.length filename) - 4) in
+let start_gen (sast : a_program) (file_name : string) =
+    let name =  String.sub file_name 0 ((String.length file_name) - 4) in
     make_header name false;
-    List.map (fun stage -> print_stage stage name) sast.stages
-
+    List.map (fun stage -> print_stage stage name) sast.stages;    
+    write_out name "}";
+     
