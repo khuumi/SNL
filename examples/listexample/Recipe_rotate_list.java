@@ -21,15 +21,18 @@ public final class Recipe_rotate_list{
 		old = my_list.access(index);
 		
 		loop_start();
+		return;
 	}
 
 	private static void loop_start(){
 		if(index.lt(length.sub(new SNLObject(1, "int"))).getBool()){
 			s_list_modifier();
+			return;
 		}
 		else{
 			my_list.set(new SNLObject(0, "int"), old);
 			ret = my_list;
+			return;
 		}
 	}
 
@@ -40,6 +43,7 @@ public final class Recipe_rotate_list{
 		index = index.add(new SNLObject(1, "int"));
 
 		loop_start();
+		return;
 	}
 
 }

@@ -9,7 +9,7 @@ open Ast
 let write_out (filename : string) (buffer : string) =
     let file = (open_out_gen [Open_creat; Open_wronly;
     Open_text; Open_append] 0o666
-    ("java/" ^ filename ^ ".java")) in
+    (filename)) in
 
     fprintf file "%s" buffer;
     close_out file

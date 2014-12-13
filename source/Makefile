@@ -1,8 +1,8 @@
-ast_test: objects java ast
-	ocamlc -o snl_ast ast.cmo parser.cmo scanner.cmo codegen.cmo analyzer.cmo snl_ast.cmo
+ast_test: objects java compiler
+	ocamlc -o snl ast.cmo parser.cmo scanner.cmo codegen.cmo analyzer.cmo snl.cmo
 
-ast: snl_ast.ml
-	ocamlc -c snl_ast.ml
+compiler: snl.ml
+	ocamlc -c snl.ml
 
 java: codegen.ml
 	ocamlc -c codegen.ml
@@ -22,4 +22,4 @@ test: ast_test
 
 .PHONY: clean
 clean:
-	rm -f parser.mli scanner.ml parser.ml parser.output *.cmo *.cmi snl_ast *~
+	rm -f parser.mli scanner.ml parser.ml parser.output *.cmo *.cmi snl *~
