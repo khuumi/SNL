@@ -5,13 +5,13 @@ open Sast
    and variables which are tuples of stings and Sast types *)
 type symbol_table = {
     mutable variables : (string * Sast.t) list;
-  }
+}
 
 
 type environment = {
     global_scope : symbol_table;
     local_scope : symbol_table;
-  }
+}
 
 
 let type_of_const (ac : Sast.a_constant) : Sast.t =
@@ -162,6 +162,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
                                 TUnknown)
                      | _ -> failwith "Bad list access"
 
+
 let rec annotate_stmt (s : Ast.stmt) (env : environment) : Sast.a_stmt =
   match s with
     Expr(e) -> AExpr(annotate_expr e env)
@@ -183,7 +184,9 @@ let annotate_stage (s : Ast.stage) (env : environment) : Sast.a_stage =
 
 
 let annotate_recipe (r : Ast.recipe) : Sast.a_recipe =
-  let new_env = { global_scope = { variables = []; };
+  let new_env = { global_scope = {
+                    variables = List.map (fun s -> (s, TUnknown)) r.formals;
+                  };
                   local_scope = { variables = []; }; } in
   { rname = r.rname;
     formals = r.formals;
