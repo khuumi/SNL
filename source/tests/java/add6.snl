@@ -1,0 +1,3 @@
+start float_add:
+    do show to 5.5 + 5. + .5
+done
