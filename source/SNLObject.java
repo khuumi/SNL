@@ -8,7 +8,7 @@ public class SNLObject{
     private double valueFloat;
     private boolean valueBool;
     private String valueString;
-    private ArrayList<SNLObject> valueList;
+    private SNLObject[] valueList;
 
     // used for comparison in typeCheck
     private final String intName = "int";
@@ -45,9 +45,9 @@ public class SNLObject{
     // t is moved because of Java requirements
     public SNLObject(String t, SNLObject ... objects){
         type = t;
-        valueList = new ArrayList<SNLObject>();
+        valueList = new SNLObject[objects.length];
         for(int i = 0; i<objects.length; i++)
-            valueList.add(objects[i]);
+            valueList[i] = objects[i];
     }
 
     // copy constructor
@@ -59,8 +59,11 @@ public class SNLObject{
         if(t.equals(floatName)){valueFloat = old.getFloat();}
         if(t.equals(boolName)){valueBool = old.getBool();}
         if(t.equals(stringName)){valueString = old.getString();}
-        if(t.equals(listName)){valueList = new 
-            ArrayList<SNLObject>(old.getAL());}
+        if(t.equals(listName)){
+            valueList = new SNLObject[old.getArr().length];
+            for(int i=0; i<old.getArr().length; i++)
+                valueList[i] = old.getArr()[i];
+        }
     }
 
     // getter methods for private data
@@ -69,7 +72,7 @@ public class SNLObject{
         return type;
     }
 
-    private int getInt(){
+    public int getInt(){
         return valueInt;
     }
 
@@ -77,17 +80,17 @@ public class SNLObject{
         return valueFloat;
     }
 
-    // this is the only one that should be called from outside
-    // because of if statements
-    public boolean getBool(){
-        return valueBool;
-    }
-
     private String getString(){
         return valueString;
     }
 
-    private ArrayList<SNLObject> getAL(){
+    // these two are the only public ones
+    // because of if statements and access
+    public boolean getBool(){
+        return valueBool;
+    }
+
+    public SNLObject[] getArr(){
         return valueList;
     }
 
@@ -546,7 +549,7 @@ public class SNLObject{
         // return is null if something went wrong at runtime
         return snlo;
     }
-
+/*
     // this is to get from the list
     public SNLObject access(SNLObject index){
 
@@ -565,18 +568,20 @@ public class SNLObject{
         if(type.equals(listName))
             valueList.set(index.getInt(), obj);          
 
-    }
+    }*/
 
     // this is to append an element to the list
     public void app(SNLObject obj){
-
+        System.out.println("NOT WORKING YET");
+        SNLObject[] tmp = new SNLObject[valueList.length+1];
+        System.arraycopy(valueList, 0, tmp, 0, valueList.length);
         if(type.equals(listName))
-            valueList.add(obj);   
+            valueList[valueList.length] = obj;   
     }
 
     // get the length of the list
     public SNLObject length(){
-        return new SNLObject(valueList.size(), "int");
+        return new SNLObject(valueList.length, "int");
     }
 
     public String toString(){
@@ -591,10 +596,10 @@ public class SNLObject{
 
             String s = "[ ";
             
-            for(int i=0; i<valueList.size()-1; i++){
-                s = s + getAL().get(i).toString() + ", ";
+            for(int i=0; i<valueList.length-1; i++){
+                s = s + valueList[i].toString() + ", ";
             }
-            s = s + getAL().get(valueList.size()-1).toString() + " ]";
+            s = s + valueList[valueList.length-1].toString() + " ]";
             
             return s;
         }
