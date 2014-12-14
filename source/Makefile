@@ -1,5 +1,8 @@
-ast_test: objects java compiler
-	ocamlc -o snl ast.cmo parser.cmo scanner.cmo codegen.cmo analyzer.cmo str.cma snl.cmo
+ast_test: touch objects java compiler
+	ocamlc -o snl ast.cmo parser.cmo scanner.cmo str.cma codegen.cmo analyzer.cmo snl.cmo
+
+touch:
+	touch codegen.ml
 
 compiler: snl.ml
 	ocamlc -c snl.ml

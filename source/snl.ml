@@ -28,5 +28,5 @@ let _ =
      if Sys.file_exists pname then Sys.remove(pname);
      let ast = Parser.program Scanner.tokenize lexbuf in
      let sast = Analyzer.annotate_program ast in
-     ignore (Codegen.start_gen sast pname);
-     print_string (Ast.program_s ast)
+     ignore (Codegen.start_gen sast pname)
+     (*print_string (Ast.program_s ast)*)
