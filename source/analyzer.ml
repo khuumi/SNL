@@ -28,7 +28,7 @@ let rec type_of (ae : Sast.a_expr) : Sast.t =
   | AId(_, _, t) -> t
   | AUnop(_, _, t) -> t
   | ABinop(_, _, _, t) -> t
-  | AAssign(expr) -> type_of expr
+  | AAssign(e1, e2) -> type_of e2
   | ANext(_, t) -> t
   | AReturn(_, t) -> t
   | AList(_, t) -> t
@@ -131,13 +131,15 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | Assign(e1, e2) ->
      (match e1 with
       | Id(str, scope) -> let ae2 = annotate_expr e2 env in
-                          mutate_or_add env e1 (type_of ae2);
-                          AAssign(ae2)
+                             mutate_or_add env e1 (type_of ae2); 
+                          let ae1 = annotate_expr e1 env in  
+                          AAssign(ae1, ae2)
       | Access(index, id) -> let ae2 = annotate_expr e2 env in
+                             let ae1 = annotate_expr e1 env in 
                              (match find_variable_type env id with
                               | Some(TList(t_arr)) ->
                                  t_arr.(index) <- type_of ae2;
-                                 AAssign(ae2)
+                                 AAssign(ae1, ae2)
                               | _ -> failwith "Variable not found")
       | _ -> failwith "Invalid assignment operation")
   | Next(s) -> ANext(s, TOCamlString)

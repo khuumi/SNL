@@ -20,7 +20,7 @@ type a_expr =
   | AId of string * Ast.scope * t
   | AUnop of Ast.op * a_expr * t
   | ABinop of a_expr * Ast.op * a_expr * t
-  | AAssign of a_expr
+  | AAssign of a_expr * a_expr
   | ANext of string * t
   | AReturn of a_expr * t
   | AList of a_expr list * t
