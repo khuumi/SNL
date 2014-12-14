@@ -173,7 +173,7 @@ let print_stage (stage : a_stage) (file_name : string) =
 
 let rec to_string_stmt (statement : a_stmt) = 
     match statement with 
-        AExpr(e) -> to_string_expr e
+        AExpr(e) -> (to_string_expr e) ^ ";\n"
       | ABlock(e_list) -> let list_of_strings = List.rev (List.fold_left  (fun list e ->
               (to_string_expr e)::list) [] e_list) in
               String.concat ""  list_of_strings
@@ -189,7 +189,7 @@ let to_string_stage (stage : a_stage) : string =
       | false -> ""
     in let list_of_strings = List.rev (List.fold_left (fun list s ->
         (to_string_stmt s)::list ) [] stage.body) in 
-    initial_header ^ header ^ (String.concat "" list_of_strings) ^ "}" 
+    initial_header ^ header ^ (String.concat "\n" list_of_strings) ^ "}" 
     
 
 let start_gen (sast : a_program) (name : string) =
