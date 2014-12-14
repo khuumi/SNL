@@ -1,0 +1,3 @@
+start sub_stage:
+	do show to 10 - 5
+done

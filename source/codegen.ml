@@ -8,7 +8,7 @@ open Ast
 let write_out (filename : string) (buffer : string) =
     let file = (open_out_gen [Open_creat; Open_wronly;
     Open_text; Open_append] 0o666
-    ("java/" ^ filename ^ ".java")) in
+    (filename)) in
 
     fprintf file "%s" buffer;
     close_out file
@@ -101,8 +101,8 @@ let rec print_expr (expr : a_expr) (filename : string) =
   | ABinop(e1, op, e2 , t) -> print_binop e1 e2 op filename
   | AAssign(e1) -> write_out filename "An assignment"
   | ANext(s, t) -> let next = s ^ "()" in write_out filename next
+  | AList(e_list, t) -> write_out filename "list"(*print_list e_list filename*)
   | AReturn(e, t) -> print_return e filename
-  | AList(_, t) -> write_out filename "a list"
   | AInput(t) -> write_out filename "new SNLObject(input.nextLine(), \"string\")" 
   | ACall(s, e_list, t) -> write_out filename "call"
   | AAccess(_, _, t) -> write_out filename "n access"
@@ -146,6 +146,22 @@ let rec print_expr (expr : a_expr) (filename : string) =
             
     | _ -> write_out file_name "do " ^ s ^ " to ... INCOMPLETE" *)
       
+                                    (*    write_out file_name "\"\")") e_list)
+                                     *    *)
+            (* INCOMPLETE *)
+  (*  | _ -> let call =  "do " ^ s ^ " to ... INCOMPLETE" in
+            let str_list = List.fold_left 
+                (fun a b -> let next = "new SNLObject("")"b::a)
+            write_out file_name call
+            ignore (List.map (fun e count -> print_expr e file_name;
+                                    write_out
+            *)
+            (* INCOMPLETE *)(*
+  and print_list (e_list : a_expr list) (file_name : string) =
+      let init_list = "new SNLObject(\"list\", " in
+      write_out file_name init_list*)
+      
+
 and print_return (e : a_expr) (file_name : string) =
     write_out file_name "return ";
     print_expr e file_name

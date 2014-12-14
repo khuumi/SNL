@@ -1,0 +1,4 @@
+start bool_stage:
+	not false
+	do show to not true
+done

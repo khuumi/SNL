@@ -1,0 +1,3 @@
+start test_stage:
+local x is "This is an unclosed string
+done

@@ -42,9 +42,12 @@ public class SNLObject{
     }
 
     // constructor for list object
-    public SNLObject(String t){
+    // t is moved because of Java requirements
+    public SNLObject(String t, SNLObject ... objects){
         type = t;
         valueList = new ArrayList<SNLObject>();
+        for(int i = 0; i<objects.length; i++)
+            valueList.add(objects[i]);
     }
 
     // copy constructor
