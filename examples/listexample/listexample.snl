@@ -7,6 +7,9 @@ start example_program:
 	changedlst is do rotate_list to lst
 	do show to lst
 	do show to changedlst
+    i is 1 of changedlst
+    0 of changedlst is "first!"
+    do show to changedlst
 done
 
 recipe rotate_list to my_list:

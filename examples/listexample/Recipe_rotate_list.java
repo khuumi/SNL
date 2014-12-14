@@ -18,7 +18,7 @@ public final class Recipe_rotate_list{
 	private static void start_rotate_list(){
 		length = my_list.length();
 		index = new SNLObject(0, "int");
-		old = my_list.access(index);
+		old = my_list.getArr()[index.getInt()];
 		
 		loop_start();
 		return;
@@ -30,15 +30,15 @@ public final class Recipe_rotate_list{
 			return;
 		}
 		else{
-			my_list.set(new SNLObject(0, "int"), old);
+			my_list.getArr()[0] = old;
 			ret = my_list;
 			return;
 		}
 	}
 
 	private static void s_list_modifier(){
-		temp = my_list.access(index.add(new SNLObject(1, "int")));
-		my_list.set(index.add(new SNLObject(1, "int")), old);
+		temp = my_list.getArr()[index.add(new SNLObject(1, "int")).getInt()];
+		my_list.getArr()[index.add(new SNLObject(1, "int")).getInt()] = old;
 		old = temp;
 		index = index.add(new SNLObject(1, "int"));
 
