@@ -1,5 +1,5 @@
 ast_test: objects java compiler
-	ocamlc -o snl ast.cmo parser.cmo scanner.cmo codegen.cmo analyzer.cmo snl.cmo
+	ocamlc -o snl ast.cmo parser.cmo scanner.cmo codegen.cmo analyzer.cmo str.cma snl.cmo
 
 compiler: snl.ml
 	ocamlc -c snl.ml
