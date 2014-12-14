@@ -1,6 +1,7 @@
 open Printf
 open Sast
 open Ast
+open Str
 
 (* let get_header = "{\n  public static void main(String args[])\n"
  *)
@@ -29,7 +30,9 @@ let get_initial_stage_header (start_stage_name : string) =
     "\n public static void main(String args[]){\n" ^start_stage_name ^ "();\n}\n"
 
 let make_header (filename : string) (is_recipe : bool) =
-    let class_name = String.sub filename 0 ((String.length filename) -5 ) in 
+    let strlst = Str.split (Str.regexp "/") filename in
+    let tail = List.hd (List.rev strlst) in
+    let class_name = String.sub tail 0 ((String.length tail) -5 ) in 
     let scanner = "import java.util.Scanner;\n" in 
     let scanner2 = "private static Scanner input = new Scanner(System.in);" in 
     match is_recipe with
