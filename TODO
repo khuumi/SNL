@@ -1,1 +1,7 @@
 Add list access to grammer
+
+
+12/13 11:23PM
+
+1. Parser needs to allow multiple arguments in a recipe call
+3. Access list type should be an expression instead of int 

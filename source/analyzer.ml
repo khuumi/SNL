@@ -13,16 +13,6 @@ type environment = {
     local_scope : symbol_table;
 }
 
-(* IR for recipe structure *)
-type jchecked_recipe = {
-    rname: string;
-    formals: (string * t) list;
-    body: a_stage list;
-    return_type: t;
-    is_called: bool;
-}
-
-let jcheck_recipe_list = []
 
 let type_of_const (ac : Sast.a_constant) : Sast.t =
   match ac with
