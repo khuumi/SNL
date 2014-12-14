@@ -1,4 +1,5 @@
-123.
+start float_stage:
+    123.
 
-do show to 12.34 + .21
-
+    do show to 12.34 + .21
+done

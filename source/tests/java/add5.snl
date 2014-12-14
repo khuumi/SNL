@@ -1,0 +1,5 @@
+start add5_int:
+    do show to 10 + -20 + 20
+    do show to -10 + 20 + 20
+    do show to 10 + 20 + -20
+done

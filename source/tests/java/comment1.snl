@@ -1,0 +1,4 @@
+start comment:
+#do show to "This is a comment.  It should appear that."
+    do show to "Comment test"
+done

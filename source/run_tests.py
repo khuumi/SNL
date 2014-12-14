@@ -120,14 +120,14 @@ def run_java_tests():
         try:
             name = test[len('tests/java/'):-len('.snl')]
             output = ''
-            # subprocess.call([AST_BIN,
-            #                  '-j', test,
-            #                  '--output_path', temp_dir])
-            # subprocess.call(['javac', '-d', temp_dir,
-            #                  'SNLObject.java',
-            #                  os.path.join(temp_dir, name + '.java')])
-            # output = subprocess.check_output(['java',
-            #                                   os.path.join(temp_dir, name)])
+            subprocess.call([AST_BIN,
+                             '-j', test,
+                             '--output_path', temp_dir])
+            subprocess.call(['javac', '-d', temp_dir,
+                              'SNLObject.java',
+                              os.path.join(temp_dir, name + '.java')])
+            output = subprocess.check_output(['java', '-classpath', temp_dir, name])
+
         except subprocess.CalledProcessError as e:
             print 'Error processing %s\n' % test, e
             TOTAL_FAIL += 1
