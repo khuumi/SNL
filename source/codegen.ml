@@ -18,12 +18,13 @@ let get_initial_stage_header (start_stage_name : string) =
     "\n public static void main(String args[]){\n" ^start_stage_name ^ "();\n}\n"
 
 let make_header (filename : string) (is_recipe : bool) =
+    let class_name = String.sub filename 0 ((String.length filename) -5 ) in 
     let scanner = "import java.util.Scanner;\n" in 
     let scanner2 = "private static Scanner input = new Scanner(System.in);" in 
     match is_recipe with
-    true -> let header = scanner ^ "public final class " ^ filename ^ "{"
+    true -> let header = scanner ^ "public final class " ^ class_name ^ "{"
     ^ scanner2 ^ "\n public static void perform(){\n" in  write_out filename header
-  | false -> let header = scanner ^ "public class " ^ filename ^ "{\n"  ^ scanner2 in write_out
+  | false -> let header = scanner ^ "public class " ^ class_name ^ "{\n"  ^ scanner2 in write_out
         filename header
 
 let print_const (const : a_constant) (filename : string) =
@@ -55,7 +56,7 @@ let rec to_string_expr (expr : a_expr) : string =
     | AAssign(e1) -> "TODO: assignment"
     | ANext(s, t) -> s ^ "()"
     | AReturn(e, t) -> "TODO: return"
-    | AList(e_list, t) -> "TODO: list" 
+    | AList(e_list, t) -> to_string_list e_list 
     | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
     | ACall(s, e_list, t) -> to_string_call s e_list
     | AAccess(i, e, t) -> "TODO: Access"
@@ -92,6 +93,11 @@ let rec to_string_expr (expr : a_expr) : string =
       | _ -> let  list_e_strings = List.rev ( List.fold_left 
            (fun list e -> (to_string_expr e)::list ) []  e_list) in 
               name ^ (String.concat ", " list_e_strings) ^ ")" 
+
+ and to_string_list (e_list : a_expr list) : string = 
+    let  list_e_strings = List.rev ( List.fold_left 
+           (fun list e -> (to_string_expr e)::list ) []  e_list) in 
+            "new SNLObject(\"list\", " ^ (String.concat ", " list_e_strings) ^ ")"
                
 let rec print_expr (expr : a_expr) (filename : string) =
     match expr with
