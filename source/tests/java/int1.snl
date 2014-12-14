@@ -1,0 +1,5 @@
+start int_stage:
+	do show to 0
+	do show to 123412
+	do show to -43
+done

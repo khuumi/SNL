@@ -1,0 +1,5 @@
+start int_stage:
+	12
+	0
+	do show to 34 + 1232
+done

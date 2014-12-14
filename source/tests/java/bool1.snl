@@ -1,0 +1,4 @@
+start print_stage:
+	true
+	do show to false
+done
