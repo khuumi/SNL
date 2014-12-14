@@ -137,7 +137,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
       | Access(e, id) -> let ae2 = annotate_expr e2 env in
                          let ae1 = annotate_expr e1 env in 
                          (match find_variable_type env id with
-                          | Some(TList(t_arr)) -> AAssign(ae1, ae2)
+                          | Some(TList) -> AAssign(ae1, ae2)
                           | _ -> failwith "Variable not found")
       | _ -> failwith "Invalid assignment operation")
   | Next(s) -> ANext(s, TOCamlString)
@@ -146,8 +146,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | List(e_list) -> let ae_list = List.map
                                     (fun e -> annotate_expr e env)
                                     e_list in
-                    AList(ae_list,
-                          TList(Array.of_list (List.map type_of ae_list)))
+                    AList(ae_list, TList)
   | Input -> AInput(TString)
   | Call(s, e_list) -> let ae_list = List.map
                                        (fun e-> annotate_expr e env)
@@ -157,7 +156,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | Access(e, id) -> let l = find_variable_type env id in
                      let ind_expr = annotate_expr e env in
                      match l with
-                     | Some(TList(t_arr)) ->
+                     | Some(TList) ->
                         AAccess(ind_expr,
                                 (annotate_expr id env),
                                 TUnknown)

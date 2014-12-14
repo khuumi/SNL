@@ -5,7 +5,7 @@ type t =
   | TFloat
   | TBool
   | TString
-  | TList of t array
+  | TList
   | TOCamlString
   | TUnknown
 
