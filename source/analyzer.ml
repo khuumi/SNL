@@ -36,9 +36,6 @@ let rec type_of (ae : Sast.a_expr) : Sast.t =
   | ACall(_, _, t) -> t
   | AAccess(_, _, t) -> t
 
-let jcheck_recipe (s : string) (ae_lst : Sast.a_expr list) =
-  s
-
 
 let find_variable_type (env : environment) (id : Ast.expr) :
       Sast.t option =
@@ -74,19 +71,6 @@ let mutate_or_add (env : environment) (id : Ast.expr) (new_type : Sast.t) =
      scope.variables <- (name, new_type) :: scope.variables
 
 
-let require_int_float (expr : a_expr) (err : string) : int =
-  match type_of expr with
-    TInt -> 0
-  | TFloat -> 1
-  | _ -> failwith err
-
-
-let require_bool (expr : a_expr) (err : string) : bool =
-  match type_of expr with
-    TBool -> true
-  | _ -> failwith err
-
-
 let annotate_const (c : Ast.constant) : Sast.a_expr =
   match c with
     Int(n) -> AConstant(AInt(n, TInt))
@@ -108,26 +92,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | Binop(e1, op, e2) ->
      let ae1 = annotate_expr e1 env
      and ae2 = annotate_expr e2 env in
-     (match op with
-      | Add | Sub | Mult | Div
-      | Lt | Leq | Gt | Geq ->
-        (let a = require_int_float
-                   ae1
-                   "left operand must be either integer or float" and
-             b = require_int_float
-                   ae2
-                   "right operand must be either integer or float" in
-         if a + b = 0 then
-           ABinop(ae1, op, ae2, TInt)
-         else ABinop(ae1, op, ae2, TFloat))
-      | And | Or ->
-               ignore (require_bool ae1 "left operand must be a bool");
-               ignore (require_bool ae2 "right operand must be a bool");
-               ABinop(ae1, op, ae2, TBool)
-      | _ -> (* Equal | Neq *)
-         if not (type_of ae1 = type_of ae2) then
-           failwith "Type mismatch in comparison" else
-           ABinop(ae1, op, ae2, TBool))
+     ABinop(ae1, op, ae2, TUnknown)
   | Assign(e1, e2) ->
      (match e1 with
       | Id(str, scope) -> let ae2 = annotate_expr e2 env in
@@ -151,7 +116,6 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | Call(s, e_list) -> let ae_list = List.map
                                        (fun e-> annotate_expr e env)
                                        e_list in
-                       let jcheck = jcheck_recipe s ae_list in
                        ACall(s, ae_list, TUnknown)
   | Access(e, id) -> let l = find_variable_type env id in
                      let ind_expr = annotate_expr e env in
@@ -168,11 +132,9 @@ let rec annotate_stmt (s : Ast.stmt) (env : environment) : Sast.a_stmt =
     Expr(e) -> AExpr(annotate_expr e env)
   | Block(e_list) -> ABlock(List.map (fun e -> annotate_expr e env) e_list)
   | If(e, s1, s2) -> let ae = annotate_expr e env in
-                     if require_bool ae "Non-bool expression in if statement"
-                     then AIf(ae,
-                              annotate_stmt s1 env,
-                              annotate_stmt s2 env)
-                     else failwith "Impossible case in AIf"
+                     AIf(ae,
+                         annotate_stmt s1 env,
+                         annotate_stmt s2 env)
 
 
 let annotate_stage (s : Ast.stage) (env : environment) : Sast.a_stage =
