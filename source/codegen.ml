@@ -5,7 +5,6 @@ open Ast
 (* let get_header = "{\n  public static void main(String args[])\n"
  *)
 
-
 let write_out (filename : string) (buffer : string) =
     let file = (open_out_gen [Open_creat; Open_wronly;
     Open_text; Open_append] 0o666
@@ -34,13 +33,66 @@ let print_const (const : a_constant) (filename : string) =
      | AFloat(fl, _) ->" new SNLObject("^ (string_of_float fl) ^", \"float\")"
      | ABool(b, _) -> " new SNLObject("^  (string_of_bool b) ^", \"bool\")"
      | AString(s, _) ->" new SNLObject(\"" ^ s ^ "\", \"string\")"
-  
   in write_out filename out
+
+let to_string_const (const : a_constant)  : string=
+    match const with
+       AInt(num, _) -> " new SNLObject("^ (string_of_int num) ^", \"int\")"                 
+     | AFloat(fl, _) ->" new SNLObject("^ (string_of_float fl) ^", \"float\")"
+     | ABool(b, _) -> " new SNLObject("^  (string_of_bool b) ^", \"bool\")"
+     | AString(s, _) ->" new SNLObject(\"" ^ s ^ "\", \"string\")"
+
 
 let print_id (s : string) (scope : Ast.scope) (file_name : string) =
     write_out file_name "ID"
 
-    
+let rec to_string_expr (expr : a_expr) : string = 
+    match expr with 
+      AConstant(const) -> to_string_const const
+    | AId(s, scope, _) -> "TODO: id" 
+    | AUnop(op, e, _) ->  to_string_unop e op
+    | ABinop(e1, op, e2, t) -> to_string_binop e1 e2 op
+    | AAssign(e1) -> "TODO: assignment"
+    | ANext(s, t) -> s ^ "()"
+    | AReturn(e, t) -> "TODO: return"
+    | AList(e_list, t) -> "TODO: list" 
+    | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
+    | ACall(s, e_list, t) -> to_string_call s e_list
+    | AAccess(i, e, t) -> "TODO: Access"
+
+  and to_string_unop (e : a_expr) (op : Ast.op) : string = 
+      let string_op = 
+          match op with 
+            Negate -> "neg"
+          | Not -> "not" in 
+      (to_string_expr e) ^ "." ^ string_op ^ "()"
+
+  and to_string_binop (e1 : a_expr) (e2 : a_expr) (op : Ast.op) = 
+    let string_op = 
+        match op with 
+        Add -> "add"
+      | Sub -> "sub"
+      | Mult -> "mult"
+      | Div -> "div"
+      | Equal -> "eq"
+      | Neq -> "neq"
+      | Gt -> "gt"
+      | Geq -> "geq"
+      | Lt -> "lt"
+      | Leq -> "leq" 
+      | And -> "and"
+      | Or -> "or" in 
+    (to_string_expr e1) ^ "." ^ string_op ^ "(" ^ (to_string_expr e2) ^ ")"
+
+ and to_string_call (name : string) (e_list : a_expr list) : string = 
+    match name with 
+        "show" -> let list_e_strings = List.rev ( List.fold_left   
+                (fun list e -> (to_string_expr e)::list ) [] e_list ) in
+                 "System.out.println(" ^ (String.concat " + " list_e_strings) ^")"
+      | _ -> let  list_e_strings = List.rev ( List.fold_left 
+           (fun list e -> (to_string_expr e)::list ) []  e_list) in 
+              name ^ (String.concat ", " list_e_strings) ^ ")" 
+               
 let rec print_expr (expr : a_expr) (filename : string) =
     match expr with
     AConstant(const) -> print_const const filename
@@ -52,7 +104,7 @@ let rec print_expr (expr : a_expr) (filename : string) =
   | AReturn(e, t) -> print_return e filename
   | AList(_, t) -> write_out filename "a list"
   | AInput(t) -> write_out filename "new SNLObject(input.nextLine(), \"string\")" 
-  | ACall(s, e_list, t) -> print_func_call s e_list filename
+  | ACall(s, e_list, t) -> write_out filename "call"
   | AAccess(_, _, t) -> write_out filename "n access"
 
   and print_binop (e1 : a_expr) (e2 : a_expr) (op : Ast.op) (filename : string) = 
@@ -85,18 +137,15 @@ let rec print_expr (expr : a_expr) (filename : string) =
       print_expr e file_name;
       write_out file_name output
 
-  and print_func_call (s : string) (e_list : a_expr list) (file_name : string) = 
+  (*and print_func_call (s : string) (e_list : a_expr list) (file_name : string) = 
      match s with 
      "show" -> write_out file_name "System.out.println("; 
                 ignore (List.map (fun e -> print_expr e file_name; 
                                         write_out file_name " + "; 
-                                        write_out file_name "\"\")") e_list)
+                                        write_out file_name "\"\")") e_list) 
             
-    | _ -> let call =  "do " ^ s ^ " to ... INCOMPLETE" in
-            write_out file_name call(*
-            ignore (List.map (fun e count -> print_expr e file_name;
-                                    write_out*)
-
+    | _ -> write_out file_name "do " ^ s ^ " to ... INCOMPLETE" *)
+      
 and print_return (e : a_expr) (file_name : string) =
     write_out file_name "return ";
     print_expr e file_name
@@ -122,8 +171,31 @@ let print_stage (stage : a_stage) (file_name : string) =
     List.map  (fun body -> print_stmt body file_name) stage.body;
     write_out file_name "}"
 
+let rec to_string_stmt (statement : a_stmt) = 
+    match statement with 
+        AExpr(e) -> to_string_expr e
+      | ABlock(e_list) -> let list_of_strings = List.rev (List.fold_left  (fun list e ->
+              (to_string_expr e)::list) [] e_list) in
+              String.concat ""  list_of_strings
+      | AIf(e, first, second) -> let first_str = to_string_stmt first in 
+                                 let second_str = to_string_stmt second in 
+                                 "if(" ^  first_str ^ "){" ^  second_str ^ "}"
+
+
+let to_string_stage (stage : a_stage) : string = 
+    let header = "private static void " ^ stage.sname ^ "(){\n" in
+    let initial_header = match stage.is_start with
+        true -> get_initial_stage_header stage.sname
+      | false -> ""
+    in let list_of_strings = List.rev (List.fold_left (fun list s ->
+        (to_string_stmt s)::list ) [] stage.body) in 
+    initial_header ^ header ^ (String.concat "" list_of_strings) ^ "}" 
+    
+
 let start_gen (sast : a_program) (name : string) =
     make_header name false;
-    List.map (fun stage -> print_stage stage name) sast.stages;    
-    write_out name "}";
-     
+    let list_of_strings = List.rev ( List.fold_left  (fun list s ->
+       (to_string_stage s)::list ) [] sast.stages) in 
+    let print_out = String.concat ""  list_of_strings ^ "}" in 
+    write_out name print_out
+      
