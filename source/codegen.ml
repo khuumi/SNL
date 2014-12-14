@@ -1,24 +1,7 @@
 open Printf
 open Sast
 open Ast
-open Str
 
-(* let get_header = "{\n  public static void main(String args[])\n"
- *)
-
-
-(*type symbol_table = {
-    mutable variables : string list;
-}
-
-type environment = {
-    global_scope : symbol_table;
-    local_scope : symbol_table;
-}
-
-let env = { global_scope = { variables = []; };
-                  local_scope = { variables = []; }; }
-*)
 let global_scope = Hashtbl.create 1000  
 
 let write_out (filename : string) (buffer : string) =
@@ -31,20 +14,23 @@ let write_out (filename : string) (buffer : string) =
  
 
 let get_initial_stage_header (start_stage_name : string) =
-    "\n public static void main(String args[]){\n" ^start_stage_name ^ "();\n}\n"
+    "\n public static void main(String args[]){\n" ^start_stage_name ^
+    "();\n}\n"
+
 
 let make_header (filename : string) (is_recipe : bool) =
-    let strlst = Str.split (Str.regexp "/") filename in
-    let tail = List.hd (List.rev strlst) in
-    let class_name = String.sub tail 0 ((String.length tail) -5 ) in 
     let scanner = "import java.util.Scanner;\n" in 
     let scanner2 = "private static Scanner input = new Scanner(System.in);" in 
-    match is_recipe with
-    true -> let header = scanner ^ "public final class " ^ class_name ^ "{"
-    ^ scanner2 ^ "\n public static void perform(){\n" in  write_out filename header
-  | false -> let header = scanner ^ "public class " ^ class_name ^ "{\n"  ^ scanner2 in write_out
-        filename header
 
+    match is_recipe with 
+    true -> let header = scanner ^ "public final class " ^ filename ^ "{"
+    ^ "private static SNLObject ret;\n" ^ scanner2 ^ 
+    "\n public static void perform(){\n" in 
+    write_out filename header
+    | false -> let class_name = String.sub filename 0 ((String.length filename) -5 ) in 
+    let header = scanner ^ "public class " ^ class_name ^ "{\n"  ^ scanner2 in write_out
+        filename header
+   
 
 let to_string_const (const : a_constant)  : string =
     match const with
@@ -134,9 +120,27 @@ let to_string_stage (stage : a_stage) : string =
     in let list_of_strings = List.rev (List.fold_left (fun list s ->
         (to_string_stmt s)::list ) [] stage.body) in 
     initial_header ^ header ^ (String.concat "\n" list_of_strings) ^ "}" 
-    
 
+let print_recipe (recipe : a_recipe) = 
+    make_header recipe.rname true;
+    (* first do a List.map and add SNLObject '_arg' to every argument name in
+     * formals. Then assign copy constructur to the actual argument name and
+     * then add that to the hashtable -- then call first stage and return ret. 
+     * After that do all the normal stage stuff -- remember to clear the
+     * hashtable for each recipe *)
+
+    
 let start_gen (sast : a_program) (name : string) =
+    (* Make the header for the recipe *)
+    List.map print_recipe 
+    make_header name true
+    let recipe
+
+    (* Remember to clear after each recipe *)
+
+
+
+
     make_header name false;
     let list_of_strings = List.rev ( List.fold_left  (fun list s ->
        (to_string_stage s)::list ) [] sast.stages) in 
