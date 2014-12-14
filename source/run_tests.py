@@ -3,10 +3,12 @@
 import argparse
 import glob
 import os
+import shutil
 import subprocess
+import tempfile
 
 
-AST_BIN = "./snl_ast"
+AST_BIN = "./snl"
 TOTAL_PASS = 0
 TOTAL_FAIL = 0
 
@@ -35,13 +37,12 @@ def run_ast_tests(files, cmd_arg):
     for test in files:
         with open(test.replace('.snl', '.out'), 'r') as f:
             expected_output = f.read()
-        with open(test, 'r') as f:
-            try:
-                output = subprocess.check_output([AST_BIN, cmd_arg], stdin=f)
-            except subprocess.CalledProcessError as e:
-                print 'Error processing %s\n' % test, e
-                TOTAL_FAIL += 1
-                continue
+        try:
+            output = subprocess.check_output([AST_BIN, cmd_arg, test])
+        except subprocess.CalledProcessError as e:
+            print 'Error processing %s\n' % test, e
+            TOTAL_FAIL += 1
+            continue
         if expected_output != output:
             TOTAL_FAIL += 1
             print '\nFAIL: %s' % test
@@ -93,17 +94,56 @@ def run_failing_tests():
     failing_tests = glob.glob('tests/failing/*.snl')
     with open(os.devnull, 'wb') as DEVNULL:
         for test in failing_tests:
-            with open(test, 'r') as f:
-                try:
-                    output = subprocess.check_output([AST_BIN, '-p'],
-                                                     stdin=f,
-                                                     stderr=DEVNULL)
-                    print '\nFAIL: %s' % test
-                    TOTAL_FAIL += 1
-                except subprocess.CalledProcessError:
-                    TOTAL_PASS += 1
-                    if args.v:
-                        print 'PASS: %s' % test
+            try:
+                output = subprocess.check_output([AST_BIN, '-p', test],
+                                                 stderr=DEVNULL)
+                print '\nFAIL: %s' % test
+                TOTAL_FAIL += 1
+            except subprocess.CalledProcessError:
+                TOTAL_PASS += 1
+                if args.v:
+                    print 'PASS: %s' % test
+    print 'Finished running failing tests.\n'
+
+
+def run_java_tests():
+    """
+    Runs all the tests in the tests/java directory.
+    """
+    global TOTAL_PASS
+    global TOTAL_FAIL
+    print 'Running compiler tests...'
+    compiler_tests = glob.glob('tests/java/*.snl')
+    temp_dir = tempfile.mkdtemp()
+    for test in compiler_tests:
+        with open(test.replace('.snl', '.out'), 'r') as f:
+            expected_output = f.read()
+        try:
+            name = test[len('tests/java/'):-len('.snl')]
+            output = ''
+            # subprocess.call([AST_BIN,
+            #                  '-j', test,
+            #                  '--output_path', temp_dir])
+            # subprocess.call(['javac', '-d', temp_dir,
+            #                  'SNLObject.java',
+            #                  os.path.join(temp_dir, name + '.java')])
+            # output = subprocess.check_output(['java',
+            #                                   os.path.join(temp_dir, name)])
+        except subprocess.CalledProcessError as e:
+            print 'Error processing %s\n' % test, e
+            TOTAL_FAIL += 1
+            continue
+        if expected_output != output:
+            TOTAL_FAIL += 1
+            print '\nFAIL: %s' % test
+            print 'EXPECTED:\n%s' % expected_output
+            print 'ACTUAL:\n%s' % output
+        else:
+            TOTAL_PASS += 1
+            if args.v:
+                print 'PASS: %s' % test
+    shutil.rmtree(temp_dir)
+    print 'Finished running compiler tests.\n'
 
 
 def main():
@@ -111,6 +151,7 @@ def main():
     run_stmt_tests()
     run_program_tests()
     run_failing_tests()
+    run_java_tests()
     print '%d out of %d tests passing.' % (TOTAL_PASS, TOTAL_PASS + TOTAL_FAIL)
 
 
