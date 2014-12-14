@@ -122,7 +122,7 @@ let to_string_stage (stage : a_stage) : string =
     initial_header ^ header ^ (String.concat "\n" list_of_strings) ^ "}" 
 
 let print_recipe (recipe : a_recipe) = 
-    make_header recipe.rname true;
+    make_header recipe.rname true
     (* first do a List.map and add SNLObject '_arg' to every argument name in
      * formals. Then assign copy constructur to the actual argument name and
      * then add that to the hashtable -- then call first stage and return ret. 
@@ -132,15 +132,8 @@ let print_recipe (recipe : a_recipe) =
     
 let start_gen (sast : a_program) (name : string) =
     (* Make the header for the recipe *)
-    List.map print_recipe 
-    make_header name true
-    let recipe
-
     (* Remember to clear after each recipe *)
-
-
-
-
+    
     make_header name false;
     let list_of_strings = List.rev ( List.fold_left  (fun list s ->
        (to_string_stage s)::list ) [] sast.stages) in 
