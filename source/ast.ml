@@ -22,7 +22,7 @@ type expr =
   | Return of expr
   | Next of string
   | Input
-  | Access of int * expr
+  | Access of expr * expr
 
 type stmt =
     Expr of expr
@@ -95,7 +95,7 @@ let rec expr_s = function
   | Return(e) -> "Return (" ^ expr_s e ^ ")"
   | Next(s) -> "Next " ^ s
   | Input -> "input"
-  | Access(i, l) -> "Access " ^ (string_of_int i) ^ " of " ^ (expr_s l)
+  | Access(i, l) -> "Access " ^ (expr_s i) ^ " of " ^ (expr_s l)
 
 let rec stmt_s = function
     Expr(e) -> "Expr (" ^ expr_s e ^ ")"

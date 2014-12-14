@@ -21,6 +21,7 @@
 %left AND OR
 %right NOT
 %left EQ NEQ LT GT LEQ GEQ
+%right OF
 %left PLUS MINUS
 %left TIMES DIVIDE
 %nonassoc UMINUS
@@ -72,7 +73,7 @@ expr:
   | RETURN expr                { Return($2) }
   | NEXT ID                    { Next($2) }
   | INPUT                      { Input }
-  | INT OF ids                 { Access($1, $3) }
+  | expr OF ids                { Access($1, $3) }
 
 
 /* Mathematical expressions. */
