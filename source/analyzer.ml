@@ -37,8 +37,8 @@ let rec type_of (ae : Sast.a_expr) : Sast.t =
   | AAccess(_, _, t) -> t
 
 let jcheck_recipe (s : string) (ae_lst : Sast.a_expr list) =
-        s
-    
+  s
+
 
 let find_variable_type (env : environment) (id : Ast.expr) :
       Sast.t option =
@@ -66,10 +66,10 @@ let mutate_or_add (env : environment) (id : Ast.expr) (new_type : Sast.t) =
   in
   match typ with
     Some(t) ->
-     (* filter name, t out of symbol_table.variables *)
-     scope.variables <-
-       (name, new_type) :: (List.filter (fun (s, _) -> s <> name)
-                                        scope.variables)
+    (* filter name, t out of symbol_table.variables *)
+    scope.variables <-
+      (name, new_type) :: (List.filter (fun (s, _) -> s <> name)
+                                       scope.variables)
   | None ->
      scope.variables <- (name, new_type) :: scope.variables
 
@@ -108,39 +108,37 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | Binop(e1, op, e2) ->
      let ae1 = annotate_expr e1 env
      and ae2 = annotate_expr e2 env in
-      (match op with
-        | Add | Sub | Mult | Div
-        | Lt | Leq | Gt | Geq ->
-           (let a = require_int_float
-                      ae1
-                      "left operand must be either integer or float" and
-                b = require_int_float
-                      ae2
-                      "right operand must be either integer or float" in
-             if a + b = 0 then
-             ABinop(ae1, op, ae2, TInt)
-            else ABinop(ae1, op, ae2, TFloat))
-        | And | Or ->
-          ignore (require_bool ae1 "left operand must be a bool");
-          ignore (require_bool ae2 "right operand must be a bool");
-          ABinop(ae1, op, ae2, TBool)
-        | _ -> (* Equal | Neq *)
-          if not (type_of ae1 = type_of ae2) then
-          failwith "Type mismatch in comparison" else
-          ABinop(ae1, op, ae2, TBool))
+     (match op with
+      | Add | Sub | Mult | Div
+      | Lt | Leq | Gt | Geq ->
+        (let a = require_int_float
+                   ae1
+                   "left operand must be either integer or float" and
+             b = require_int_float
+                   ae2
+                   "right operand must be either integer or float" in
+         if a + b = 0 then
+           ABinop(ae1, op, ae2, TInt)
+         else ABinop(ae1, op, ae2, TFloat))
+      | And | Or ->
+               ignore (require_bool ae1 "left operand must be a bool");
+               ignore (require_bool ae2 "right operand must be a bool");
+               ABinop(ae1, op, ae2, TBool)
+      | _ -> (* Equal | Neq *)
+         if not (type_of ae1 = type_of ae2) then
+           failwith "Type mismatch in comparison" else
+           ABinop(ae1, op, ae2, TBool))
   | Assign(e1, e2) ->
      (match e1 with
       | Id(str, scope) -> let ae2 = annotate_expr e2 env in
-                             mutate_or_add env e1 (type_of ae2); 
+                          mutate_or_add env e1 (type_of ae2); 
                           let ae1 = annotate_expr e1 env in  
                           AAssign(ae1, ae2)
-      | Access(index, id) -> let ae2 = annotate_expr e2 env in
-                             let ae1 = annotate_expr e1 env in 
-                             (match find_variable_type env id with
-                              | Some(TList(t_arr)) ->
-                                 t_arr.(index) <- type_of ae2;
-                                 AAssign(ae1, ae2)
-                              | _ -> failwith "Variable not found")
+      | Access(e, id) -> let ae2 = annotate_expr e2 env in
+                         let ae1 = annotate_expr e1 env in 
+                         (match find_variable_type env id with
+                          | Some(TList) -> AAssign(ae1, ae2)
+                          | _ -> failwith "Variable not found")
       | _ -> failwith "Invalid assignment operation")
   | Next(s) -> ANext(s, TOCamlString)
   | Return(e) -> let ae = annotate_expr e env in
@@ -148,21 +146,22 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | List(e_list) -> let ae_list = List.map
                                     (fun e -> annotate_expr e env)
                                     e_list in
-                    AList(ae_list,
-                          TList(Array.of_list (List.map type_of ae_list)))
+                    AList(ae_list, TList)
   | Input -> AInput(TString)
   | Call(s, e_list) -> let ae_list = List.map
                                        (fun e-> annotate_expr e env)
                                        e_list in
-                        let jcheck = jcheck_recipe s ae_list in
+                       let jcheck = jcheck_recipe s ae_list in
                        ACall(s, ae_list, TUnknown)
-  | Access(index, id) -> let l = find_variable_type env id
-                         in match l with
-                            | Some(TList(t_arr)) ->
-                               AAccess(index,
-                                       (annotate_expr id env),
-                                       t_arr.(index))
-                            | _ -> failwith "Bad list access"
+  | Access(e, id) -> let l = find_variable_type env id in
+                     let ind_expr = annotate_expr e env in
+                     match l with
+                     | Some(TList) ->
+                        AAccess(ind_expr,
+                                (annotate_expr id env),
+                                TUnknown)
+                     | _ -> failwith "Bad list access"
+
 
 let rec annotate_stmt (s : Ast.stmt) (env : environment) : Sast.a_stmt =
   match s with
@@ -185,11 +184,14 @@ let annotate_stage (s : Ast.stage) (env : environment) : Sast.a_stage =
 
 
 let annotate_recipe (r : Ast.recipe) : Sast.a_recipe =
-  let new_env = { global_scope = { variables = []; };
+  let new_env = { global_scope = {
+                    variables = List.map (fun s -> (s, TUnknown)) r.formals;
+                  };
                   local_scope = { variables = []; }; } in
   { rname = r.rname;
     formals = r.formals;
     body = List.map (fun stage -> annotate_stage stage new_env) r.body; }
+
 
 let annotate_program (p : Ast.program) : Sast.a_program =
   let new_env = { global_scope = { variables = []; };

@@ -2,7 +2,7 @@ open Printf
 open Sast
 open Ast
 
-let global_scope = Hashtbl.create 1000;;  
+let global_scope = Hashtbl.create 1000;; 
 
 let write_out (filename : string) (buffer : string) =
     let file = (open_out_gen [Open_creat; Open_wronly;
@@ -13,10 +13,17 @@ let write_out (filename : string) (buffer : string) =
     close_out file
  
 
-let get_initial_stage_header (start_stage_name : string) (is_recipe : bool) =
+let get_initial_stage_header (start_stage_name : string) (is_recipe : bool) (formals : string list) =
         match is_recipe with 
-       true -> ""
-     | false ->  "\n public static void main(String args[]){\n" ^start_stage_name ^
+       true -> let initial = "\n \tpublic static void perform(" in 
+       let list_of_args = List.map (fun name -> "SNLObject " ^ name ^ "_arg") formals
+                 in let perform_args =  (String.concat ", " list_of_args) ^ "){\n" in 
+                let args_in_body = List.map (fun name -> name ^ " = new SNLObject(" ^ name
+                 ^ "_arg);\n") formals in 
+                let constructs = (String.concat "" args_in_body) in 
+        initial ^ perform_args ^ constructs  ^ start_stage_name ^ "();\nreturn ret;\n}\n" 
+
+     | false ->  "\n public static void main(String args[]){\n" ^ start_stage_name ^
     "();\n}\n"
 
 
@@ -26,10 +33,11 @@ let make_header (filename : string) (is_recipe : bool) =
 
     match is_recipe with 
     true -> let header = scanner ^ "public final class " ^ filename ^ "{\n"
-    ^ "\tprivate static SNLObject ret;\n" ^ scanner2 ^ 
-    "\n \tpublic static void perform(" in 
+    ^ "\tprivate static SNLObject ret;\n" ^ scanner2 in 
     write_out ("Recipe_" ^filename ^".java") header
-    | false -> let class_name = String.sub filename 0 ((String.length filename) -5 ) in 
+    | false -> let trimmed_name = String.sub filename 0 ((String.length filename) -5 ) in
+    let strlist = Str.split (Str.regexp "/") trimmed_name in 
+    let class_name = List.hd (List.rev strlist) in 
     let header = scanner ^ "public class " ^ class_name ^ "{\n"  ^ scanner2 in write_out
         filename header
    
@@ -114,19 +122,20 @@ let rec to_string_stmt (statement : a_stmt) =
                                  "if(" ^  first_str ^ "){" ^  second_str ^ "}"
 
 
-let to_string_stage (stage : a_stage) (is_recipe : bool) : string = 
+let to_string_stage (stage : a_stage) (is_recipe : bool) (formals : string list) : string = 
     let header = "private static void " ^ stage.sname ^ "(){\n" in
     let initial_header = match stage.is_start with
-        true -> get_initial_stage_header stage.sname is_recipe
+        true -> get_initial_stage_header stage.sname is_recipe formals
       | false -> ""
     in let list_of_strings = List.rev (List.fold_left (fun list s ->
         (to_string_stmt s)::list ) [] stage.body) in 
     initial_header ^ header ^ (String.concat "\n" list_of_strings) ^ "}" 
 
 
-let to_string_stages (stages : a_stage list) (is_recipe : bool)  = 
+let to_string_stages (stages : a_stage list) (is_recipe : bool) 
+                        (formals : string list) = 
   let list_of_strings = List.rev ( List.fold_left  (fun list s ->
-      (to_string_stage s is_recipe)::list ) [] stages) in 
+      (to_string_stage s is_recipe formals)::list ) [] stages) in 
     let global_vars = Hashtbl.fold (fun k v acc ->
                                     "private static SNLObject "
                                     ^ k ^ ";\n" ^ acc) global_scope "" in 
@@ -135,18 +144,9 @@ let to_string_stages (stages : a_stage list) (is_recipe : bool)  =
 
 let print_recipe (recipe : a_recipe) = 
     make_header recipe.rname true; 
-    let list_of_args = 
-        List.map (fun name -> "SNLObject " ^ name ^ "_arg") recipe.formals
-    in let perform_args =  (String.concat ", " list_of_args) ^ "){\n" in 
-    let args_in_body = List.map (fun name -> name ^ " = new SNLObject(" ^ name
-    ^ "_arg);\n") recipe.formals in 
-    let constructs = (String.concat "" args_in_body) in 
-    let stages_string = to_string_stages recipe.body true in 
-    let starting_stage = "lol" in 
-    write_out ("Recipe_" ^ recipe.rname ^ ".java") (perform_args ^ constructs  ^ starting_stage
-    ^"();\nreturn ret;\n}\n" ^ stages_string) 
-
-
+    let stages_string = to_string_stages recipe.body true recipe.formals in 
+    write_out ("Recipe_" ^ recipe.rname ^ ".java")  stages_string
+    
     (* first do a List.map and add SNLObject '_arg' to every argument name in
      * formals. Then assign copy constructur to the actual argument name and
      * then add that to the hashtable -- then call first stage and return ret. 
@@ -161,4 +161,4 @@ let start_gen (sast : a_program) (name : string) =
     List.iter (fun recipe -> print_recipe recipe; Hashtbl.clear global_scope )
     sast.recipes;
     make_header name false;
-    write_out name (to_string_stages sast.stages false)
+    write_out name (to_string_stages sast.stages false [])

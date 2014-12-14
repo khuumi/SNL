@@ -126,8 +126,9 @@ def run_java_tests():
             subprocess.call(['javac', '-d', temp_dir,
                               'SNLObject.java',
                               os.path.join(temp_dir, name + '.java')])
-            output = subprocess.check_output(['java', '-classpath', temp_dir, name])
-
+            output = subprocess.check_output(['java',
+                                              '-classpath', temp_dir,
+                                              name])
         except subprocess.CalledProcessError as e:
             print 'Error processing %s\n' % test, e
             TOTAL_FAIL += 1

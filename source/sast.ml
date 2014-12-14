@@ -5,7 +5,7 @@ type t =
   | TFloat
   | TBool
   | TString
-  | TList of t array
+  | TList
   | TOCamlString
   | TUnknown
 
@@ -26,7 +26,7 @@ type a_expr =
   | AList of a_expr list * t
   | AInput of t
   | ACall of string * a_expr list * t
-  | AAccess of int * a_expr * t
+  | AAccess of a_expr * a_expr * t
 
 type a_stmt =
     AExpr of a_expr
