@@ -1,4 +1,5 @@
 open Analyzer
+open Str
 
 type action = Expr | Stmt | Program | Java
 
@@ -21,14 +22,14 @@ let _ =
   | Java ->
   (* see if file exists and remove if it is already there *)
     let lexbuf2 = Lexing.from_channel (open_in Sys.argv.(2)) in
+    let strlst = split (regexp "/") Sys.argv.(2) in
     let path = if Array.length Sys.argv > 3
             then List.assoc Sys.argv.(3) [("-path" ,"./"^Sys.argv.(4)^"/");]
                else "java/" in
      
-    let name = String.sub Sys.argv.(2) 0 ((String.length Sys.argv.(2))-4) in
+    let name = String.sub (List.tl strlst) 0 ((String.length (List.tl strlst))-4) in
     let pname = path^name^".java" in
     if Sys.file_exists pname then Sys.remove(pname);
-   
 
     let ast = Parser.program Scanner.tokenize 
             lexbuf2 in

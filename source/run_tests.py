@@ -6,7 +6,7 @@ import os
 import subprocess
 
 
-AST_BIN = "./snl_ast"
+AST_BIN = "./snl"
 TOTAL_PASS = 0
 TOTAL_FAIL = 0
 
@@ -24,7 +24,6 @@ def run_ast_tests(files, cmd_arg):
     anywhere else in the file name.
     The expected output files must be named exactly as the input files except
     that they end with the extension '.out' instead of '.snl'.
-
     Args:
       files: a list of the names of input files, all of which end in '.snl'.
       cmd_arg: the corresponding argument to pass into the AST-printing binary,
