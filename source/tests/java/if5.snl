@@ -1,19 +1,9 @@
 recipe testif to x, y, z:
 	start testif:
 		d is 0
-		if (x = 3):
+		if (x = 3)
 			(d is y)
-		else:
-			(d is z)
-		do show to d
-	done
-done
-
-recipe badif to x, y, z:
-	start badif:	
-		if x = 3:
-			(d is y)
-		else:
+		else
 			(d is z)
 		do show to d
 	done

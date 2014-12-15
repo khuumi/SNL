@@ -1,7 +1,7 @@
 start if2:
-	if true:
+	if true
 		(do show to 42)
-	else:
+	else
 		(do show to 6)
 	do show to 24
 done

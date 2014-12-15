@@ -1,7 +1,7 @@
 start if4:
-	if false:
+	if false
 		(do show to 42)
-	else:
+	else
 		(do show to 11)
 	do show to 24
 done
