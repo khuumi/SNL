@@ -35,7 +35,9 @@ let make_header (filename : string) (is_recipe : bool) =
   let scanner2 = "\tprivate static Scanner input = new Scanner(System.in);" in 
 
     match is_recipe with 
-        true -> let header = scanner ^ "public final class " ^ "Recipe_" ^ filename ^ "{\n"
+        true -> let path = "Recipe_" ^ filename ^ ".java" in
+        if Sys.file_exists path then Sys.remove path;
+            let header = scanner ^ "public final class " ^ "Recipe_" ^ filename ^ "{\n"
         ^ "\tprivate static SNLObject ret;\n" ^ scanner2 in 
           write_out ("Recipe_" ^filename ^".java") header
       | false -> let trimmed_name = String.sub filename 0 ((String.length filename) -5 ) in

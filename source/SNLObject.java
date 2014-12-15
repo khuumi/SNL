@@ -554,9 +554,37 @@ public class SNLObject{
     public void app(SNLObject obj){
         SNLObject[] tmp = new SNLObject[valueList.length+1];
         System.arraycopy(valueList, 0, tmp, 0, valueList.length);
-        if(type.equals(listName))
-            tmp[tmp.length-1] = obj;   
+        tmp[tmp.length-1] = obj;   
         valueList = tmp;
+    }
+
+    // insert into a list 
+    public void insert(SNLObject index, SNLObject obj){
+        int insertLocation = index.getInt();
+        SNLObject[] tmp = new SNLObject[valueList.length+1];
+        
+        System.arraycopy(valueList, 0, tmp, 0, insertLocation);
+        
+        tmp[insertLocation] = obj;
+
+        for(int i=insertLocation+1; i<tmp.length; i++)
+            tmp[i] = valueList[i-1];
+        valueList = tmp;
+    }
+
+    // remove index from a list
+    public SNLObject remove(SNLObject index){
+        int rmLocation = index.getInt();
+        SNLObject[] tmp = new SNLObject[valueList.length-1];
+
+        System.arraycopy(valueList, 0, tmp, 0, rmLocation);
+        SNLObject ret = valueList[rmLocation];
+
+        for(int i=rmLocation; i<tmp.length; i++)
+            tmp[i] = valueList[i+1];
+
+        valueList = tmp;
+        return ret;
     }
 
     // get the length of the list
