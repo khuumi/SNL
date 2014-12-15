@@ -1,6 +1,6 @@
 recipe fakercp to x, y:
   start fake:
-    return 0
+      return 0
   done
 done
 

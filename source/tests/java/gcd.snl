@@ -11,6 +11,7 @@ recipe gcd to x, y:
       (x is x - y)
     else
       (y is y - x)
+    next begin
   done
 done
 

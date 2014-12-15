@@ -1,9 +1,10 @@
 recipe fib to x:
   start fib:
+    y is x
     if x < 2
       (return 1)
     else
-      (return (do fib to x -1) + (do fib to x -2))
+      (return (do fib to x -2) + (do fib to y -1))
   done
 done
 
