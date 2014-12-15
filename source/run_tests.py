@@ -124,8 +124,8 @@ def run_java_tests():
             subprocess.call([AST_BIN,
                              '-j', test,
                              '--output_path', temp_dir])
-            subprocess.call(['javac', '-d', temp_dir,
-                              os.path.join(temp_dir, name + '.java')])
+            subprocess.call(['javac', '-d', temp_dir] +
+                            glob.glob(temp_dir + "/*.java"))
             output = subprocess.check_output(['java',
                                               '-classpath', temp_dir,
                                               name])

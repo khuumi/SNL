@@ -1,11 +1,11 @@
 recipe fakercp to x, y:
-	start fake:
-		return 0
-	done
+  start fake:
+    return 0
+  done
 done
 
-start:
-	i is 1
-	do fakercp to i is 2, i is i + 1
-	do show to i
+start main:
+  i is 1
+  i is do fakercp to 2, i
+  do show to i
 done

@@ -1,6 +1,10 @@
 open Ast
 open Sast
 
+
+module StringMap = Map.Make(String);;
+
+
 (* A symbol table wich includes a parent symbol table
    and variables which are tuples of stings and Sast types *)
 type symbol_table = {
@@ -162,3 +166,66 @@ let annotate_program (p : Ast.program) : Sast.a_program =
                   local_scope = { variables = []; }; } in
   { recipes = List.map annotate_recipe p.recipes;
     stages = List.map (fun stage -> annotate_stage stage new_env) p.stages; }
+
+
+let rec collect_outs (s : Sast.a_stage) : string list =
+  List.fold_left collect_nexts_stmt [] s.body
+and collect_nexts_stmt (l : string list) (s : Sast.a_stmt) : string list =
+  match s with
+    AExpr(ae) -> collect_nexts_expr l ae
+  | ABlock(e_l) -> List.fold_left collect_nexts_expr l e_l
+  | AIf(_, s1, s2) -> collect_nexts_stmt (collect_nexts_stmt l s1) s2
+and collect_nexts_expr (l : string list) (e : Sast.a_expr) : string list =
+  match e with
+    ANext(s, _) -> if List.exists (fun name -> name = s) l
+                   then l
+                   else s :: l
+  | _ -> l
+
+
+let generate_stage_diagnostics (stages : Sast.a_stage list) :
+      string list * string list =
+  (* TODO: Make sure all stage names are unique. *)
+  let snames = List.map (fun s -> s.sname) stages in
+  let outs_graph = List.fold_left
+                     (fun map stage -> StringMap.add
+                                         stage.sname
+                                         (collect_outs stage)
+                                         map)
+                     StringMap.empty
+                     stages in
+  let ins_graph = StringMap.fold
+                    (fun name outs map ->
+                     List.fold_left
+                       (fun map out_name ->
+                        if StringMap.mem out_name map
+                        then StringMap.add
+                               out_name
+                               (name :: (StringMap.find out_name map))
+                               map
+                        else StringMap.add out_name [name] map)
+                       map
+                       outs)
+                    outs_graph
+                    StringMap.empty in
+  let warnings = StringMap.fold
+                   (fun name ins w -> if List.length ins = 0
+                                      then ("Warning: stage " ^
+                                              name ^
+                                                " is not reachable.") :: w
+                                      else w)
+                   ins_graph
+                   []
+  and errors = StringMap.fold
+                 (fun name outs e ->
+                  List.fold_left
+                    (fun e_l oname ->
+                     if List.exists (fun n -> n = oname) snames
+                     then e_l
+                     else ("Error in stage " ^ name ^ ": next " ^
+                             oname ^ " goes to an invalid stage.") :: e_l)
+                    e
+                    outs)
+                 outs_graph
+                 [] in
+  warnings, errors

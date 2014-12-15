@@ -1,10 +1,8 @@
 
 recipe random to x:
 	start rand:
-		y is a
+		y is x
 		do show to y
-		a is x
-		do show to a
 	done
 done
 
