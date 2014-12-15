@@ -1,8 +1,20 @@
+(* Usage: ./snl [-e | -s | -p | -j] file [-o output_file] *)
+
 open Analyzer
+open Sast
+
 
 type action = Expr | Stmt | Program | Java
 
-(* Usage: ./snl [-e | -s | -p | -j] file [-o output_file] *)
+(* Prints warnings and errors for stages.
+   Returns true if any errors, else false.*)
+let print_stage_diagnostics (stages : Sast.a_stage list) =
+  let stage_warnings, stage_errors =
+    Analyzer.generate_stage_diagnostics stages in
+  ignore (List.map print_string stage_warnings);
+  ignore (List.map print_string stage_errors);
+  if List.length stage_errors > 0 then true else false
+
 
 let _ =
   let action = List.assoc Sys.argv.(1) [("-e", Expr);
@@ -28,5 +40,13 @@ let _ =
      if Sys.file_exists pname then Sys.remove(pname);
      let ast = Parser.program Scanner.tokenize lexbuf in
      let sast = Analyzer.annotate_program ast in
-     ignore (Codegen.start_gen sast pname)
+     let recipe_errors = List.fold_left
+                           (fun error r ->
+                            error || print_stage_diagnostics r.body)
+                           false
+                           sast.recipes in
+     let any_error = recipe_errors || print_stage_diagnostics sast.stages in
+     if any_error
+     then exit 1
+     else ignore (Codegen.start_gen sast pname)
      (*print_string (Ast.program_s ast)*)
