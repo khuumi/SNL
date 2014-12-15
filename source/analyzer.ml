@@ -184,28 +184,60 @@ and collect_nexts_expr (l : string list) (e : Sast.a_expr) : string list =
   | _ -> l
 
 
+(* Returns a set of the names of reachable stages and a list of errors with the
+   names of invalid stages attempted to visit. *)
 let rec visit_stages (queue : string list)
                      (visited : StringSet.t)
-                     (stages: StringMap.t)
-                     ?err(erro: StringSet.t * string list =
+                     (stages)
+                     (errors : string list) : StringSet.t * string list =
   if List.length queue = 0
-  then visited
-  else visit_stages
-         (add queue head's nexts to queue)
-         (add queue head to visited)
+  then visited, errors
+  else let current = List.hd queue in
+       let nexts = StringMap.find current stages in
+       visit_stages
+         ((List.tl queue) @
+            (List.filter
+               (fun name -> not(List.mem name queue) &&
+                              not(StringSet.mem name visited) &&
+                                StringMap.mem name stages)
+               nexts))
+         (StringSet.add current visited)
          stages
+         (errors @
+            List.map
+              (fun inval -> "Error in stage " ^ current ^ ": next " ^
+                              inval ^ " calls an invalid stage.")
+              (List.filter
+                 (fun name -> not(StringMap.mem name stages))
+                 nexts))
 
 
+(* Returns a list of warnings and a list of errors for unreachable and
+   invalid stages. *)
 let generate_stage_flow_diagnostics (stages : Sast.a_stage list) :
       string list * string list =
-  [], []
-  (* let start = List.find (fun s -> s.is_start) stages in *)
-  (* let queue = [start] *)
+  let start = List.find (fun s -> s.is_start) stages in
+  let visited, errors =
+    visit_stages
+      [start.sname]
+      StringSet.empty
+      (List.fold_left (fun map stage ->
+                       StringMap.add stage.sname (collect_outs stage) map)
+                      StringMap.empty
+                      stages)
+      []
+  and stage_set = StringSet.of_list (List.map (fun s -> s.sname) stages) in
+  let unreachable = StringSet.diff stage_set visited in
+  (StringSet.fold
+     (fun name warnings ->
+      ("Warning: stage " ^ name ^ " is unreachable.") :: warnings)
+     unreachable
+     []), errors
 
 
+(* Returns a list of warnings and a list of errors. *)
 let generate_stage_diagnostics (stages : Sast.a_stage list) :
       string list * string list =
-  (* TODO: Make sure all stage names are unique. *)
   let snames = List.map (fun s -> s.sname) stages in
   let dup_name_errors =
     StringMap.fold
@@ -231,53 +263,3 @@ let generate_stage_diagnostics (stages : Sast.a_stage list) :
   in if List.length errors > 0
      then [], errors
      else generate_stage_flow_diagnostics stages
-
-
-  (* let snames = List.map (fun s -> s.sname) stages in *)
-  (* let outs_graph = List.fold_left *)
-  (*                    (fun map stage -> StringMap.add *)
-  (*                                        stage.sname *)
-  (*                                        (collect_outs stage) *)
-  (*                                        map) *)
-  (*                    StringMap.empty *)
-  (*                    stages in *)
-  (* let ins_graph = StringMap.fold *)
-  (*                   (fun name outs map -> *)
-  (*                    List.fold_left *)
-  (*                      (fun map out_name -> *)
-  (*                       if StringMap.mem out_name map *)
-  (*                       then StringMap.add *)
-  (*                              out_name *)
-  (*                              (name :: (StringMap.find out_name map)) *)
-  (*                              map *)
-  (*                       else StringMap.add out_name [name] map) *)
-  (*                      map *)
-  (*                      outs) *)
-  (*                   outs_graph *)
-  (*                   (List.fold_left (fun map name -> StringMap.add *)
-  (*                                                     name *)
-  (*                                                     [] *)
-  (*                                                     map) *)
-  (*                                   StringMap.empty *)
-  (*                                   snames) in *)
-  (* let warnings = StringMap.fold *)
-  (*                  (fun name ins w -> if List.length ins = 0 *)
-  (*                                     then ("Warning: stage " ^ *)
-  (*                                             name ^ *)
-  (*                                               " is not reachable.") :: w *)
-  (*                                     else w) *)
-  (*                  ins_graph *)
-  (*                  [] *)
-  (* and errors = StringMap.fold *)
-  (*                (fun name outs e -> *)
-  (*                 List.fold_left *)
-  (*                   (fun e_l oname -> *)
-  (*                    if List.exists (fun n -> n = oname) snames *)
-  (*                    then e_l *)
-  (*                    else ("Error in stage " ^ name ^ ": next " ^ *)
-  (*                            oname ^ " goes to an invalid stage.") :: e_l) *)
-  (*                   e *)
-  (*                   outs) *)
-  (*                outs_graph *)
-  (*                [] in *)
-  (* warnings, errors *)

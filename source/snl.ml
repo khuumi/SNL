@@ -12,8 +12,8 @@ type action = Expr | Stmt | Program | Java
 let print_stage_diagnostics (stages : Sast.a_stage list) =
   let stage_warnings, stage_errors =
     Analyzer.generate_stage_diagnostics stages in
-  ignore (List.map print_string stage_warnings);
-  ignore (List.map print_string stage_errors);
+  ignore (List.map print_endline stage_warnings);
+  ignore (List.map print_endline stage_errors);
   if List.length stage_errors > 0 then true else false
 
 
@@ -57,7 +57,7 @@ let _ =
                            sast.recipes in
      let any_error = recipe_errors || print_stage_diagnostics sast.stages in
      if any_error
-     then exit 1
+     then failwith "Errors in program."
      else write_out (path ^ name ^ ".java") (Codegen.gen_main sast.stages name);
      ignore (List.map
                (fun recipe -> write_out
