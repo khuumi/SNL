@@ -50,7 +50,9 @@ let find_variable_type (env : environment) (id : Ast.expr) :
       | _ -> failwith "Error using find_variable_type"
     in
     Some(typ)
-  with Not_found -> None
+  with Not_found -> match id with
+                      Id(_, Global) -> Some(TUnknown)
+                    | _ -> None
 
 
 (* Check to see if param is important or not *)
@@ -96,7 +98,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
   | Assign(e1, e2) ->
      (match e1 with
       | Id(str, scope) -> let ae2 = annotate_expr e2 env in
-                          mutate_or_add env e1 (type_of ae2); 
+                          mutate_or_add env e1 (type_of ae2);
                           let ae1 = annotate_expr e1 env in  
                           AAssign(ae1, ae2)
       | Access(e, id) -> let ae2 = annotate_expr e2 env in
