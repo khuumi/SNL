@@ -1,0 +1,5 @@
+start simple:
+	a is 42
+	b is 5
+	do show to a + 5*b
+done

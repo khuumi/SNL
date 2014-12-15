@@ -1,0 +1,25 @@
+recipe testif to x, y, z:
+	start testif:
+		d is 0
+		if (x = 3):
+			(d is y)
+		else:
+			(d is z)
+		do show to d
+	done
+done
+
+recipe badif to x, y, z:
+	start badif:	
+		if x = 3:
+			(d is y)
+		else:
+			(d is z)
+		do show to d
+	done
+done
+
+start if5:
+	do testif to 3, 43, 242
+	do testif to 4, 43, 242
+done

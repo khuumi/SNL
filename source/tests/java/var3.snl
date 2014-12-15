@@ -1,0 +1,12 @@
+recipe print to x, y:
+	start printing:
+		do show to x
+		do show to y
+	done
+done
+
+start main:
+	a is 1910
+	b 5
+	do print to a + 3*b, 100
+done

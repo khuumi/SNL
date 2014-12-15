@@ -1,0 +1,4 @@
+start list:
+	list is [1, "a", true, 1.0]
+	do show to list
+done

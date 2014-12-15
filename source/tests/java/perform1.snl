@@ -1,0 +1,3 @@
+start perform:
+	do show to "performing"
+done

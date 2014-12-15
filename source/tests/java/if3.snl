@@ -1,0 +1,5 @@
+start if3:
+	if false:
+		(do show to 42)
+	do show to 24
+done

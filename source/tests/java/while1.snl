@@ -1,0 +1,17 @@
+start while:
+	i is 5
+	next loopstart
+done
+
+loopstart:
+	if i > 0:
+		(do show to i
+		i is i - 1
+		next loopstart)
+	else
+		next loopend
+done
+
+loopend:
+	do show to 1910
+done
