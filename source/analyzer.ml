@@ -3,6 +3,7 @@ open Sast
 
 
 module StringMap = Map.Make(String);;
+module StringSet = Set.Make(String);;
 
 
 (* A symbol table wich includes a parent symbol table
@@ -183,49 +184,100 @@ and collect_nexts_expr (l : string list) (e : Sast.a_expr) : string list =
   | _ -> l
 
 
+let rec visit_stages (queue : string list)
+                     (visited : StringSet.t)
+                     (stages: StringMap.t)
+                     ?err(erro: StringSet.t * string list =
+  if List.length queue = 0
+  then visited
+  else visit_stages
+         (add queue head's nexts to queue)
+         (add queue head to visited)
+         stages
+
+
+let generate_stage_flow_diagnostics (stages : Sast.a_stage list) :
+      string list * string list =
+  [], []
+  (* let start = List.find (fun s -> s.is_start) stages in *)
+  (* let queue = [start] *)
+
+
 let generate_stage_diagnostics (stages : Sast.a_stage list) :
       string list * string list =
   (* TODO: Make sure all stage names are unique. *)
   let snames = List.map (fun s -> s.sname) stages in
-  let outs_graph = List.fold_left
-                     (fun map stage -> StringMap.add
-                                         stage.sname
-                                         (collect_outs stage)
-                                         map)
-                     StringMap.empty
-                     stages in
-  let ins_graph = StringMap.fold
-                    (fun name outs map ->
-                     List.fold_left
-                       (fun map out_name ->
-                        if StringMap.mem out_name map
-                        then StringMap.add
-                               out_name
-                               (name :: (StringMap.find out_name map))
-                               map
-                        else StringMap.add out_name [name] map)
-                       map
-                       outs)
-                    outs_graph
-                    StringMap.empty in
-  let warnings = StringMap.fold
-                   (fun name ins w -> if List.length ins = 0
-                                      then ("Warning: stage " ^
-                                              name ^
-                                                " is not reachable.") :: w
-                                      else w)
-                   ins_graph
-                   []
-  and errors = StringMap.fold
-                 (fun name outs e ->
-                  List.fold_left
-                    (fun e_l oname ->
-                     if List.exists (fun n -> n = oname) snames
-                     then e_l
-                     else ("Error in stage " ^ name ^ ": next " ^
-                             oname ^ " goes to an invalid stage.") :: e_l)
-                    e
-                    outs)
-                 outs_graph
-                 [] in
-  warnings, errors
+  let dup_name_errors =
+    StringMap.fold
+      (fun name count errors ->
+       if count > 1
+       then ("Error: multiple stages named " ^ name ^ ".") :: errors
+       else errors)
+      (List.fold_left
+         (fun map name ->
+          if StringMap.mem name map
+          then StringMap.add name ((StringMap.find name map) + 1) map
+          else StringMap.add name 1 map)
+         StringMap.empty
+         snames)
+      []
+  and num_starts = List.length (List.filter (fun s -> s.is_start) stages)
+  in let errors =
+       if num_starts > 1
+       then ["Error: more than one stage is marked start."] @ dup_name_errors
+       else if num_starts < 1
+       then ["Error: no stages marked start."] @ dup_name_errors
+       else dup_name_errors
+  in if List.length errors > 0
+     then [], errors
+     else generate_stage_flow_diagnostics stages
+
+
+  (* let snames = List.map (fun s -> s.sname) stages in *)
+  (* let outs_graph = List.fold_left *)
+  (*                    (fun map stage -> StringMap.add *)
+  (*                                        stage.sname *)
+  (*                                        (collect_outs stage) *)
+  (*                                        map) *)
+  (*                    StringMap.empty *)
+  (*                    stages in *)
+  (* let ins_graph = StringMap.fold *)
+  (*                   (fun name outs map -> *)
+  (*                    List.fold_left *)
+  (*                      (fun map out_name -> *)
+  (*                       if StringMap.mem out_name map *)
+  (*                       then StringMap.add *)
+  (*                              out_name *)
+  (*                              (name :: (StringMap.find out_name map)) *)
+  (*                              map *)
+  (*                       else StringMap.add out_name [name] map) *)
+  (*                      map *)
+  (*                      outs) *)
+  (*                   outs_graph *)
+  (*                   (List.fold_left (fun map name -> StringMap.add *)
+  (*                                                     name *)
+  (*                                                     [] *)
+  (*                                                     map) *)
+  (*                                   StringMap.empty *)
+  (*                                   snames) in *)
+  (* let warnings = StringMap.fold *)
+  (*                  (fun name ins w -> if List.length ins = 0 *)
+  (*                                     then ("Warning: stage " ^ *)
+  (*                                             name ^ *)
+  (*                                               " is not reachable.") :: w *)
+  (*                                     else w) *)
+  (*                  ins_graph *)
+  (*                  [] *)
+  (* and errors = StringMap.fold *)
+  (*                (fun name outs e -> *)
+  (*                 List.fold_left *)
+  (*                   (fun e_l oname -> *)
+  (*                    if List.exists (fun n -> n = oname) snames *)
+  (*                    then e_l *)
+  (*                    else ("Error in stage " ^ name ^ ": next " ^ *)
+  (*                            oname ^ " goes to an invalid stage.") :: e_l) *)
+  (*                   e *)
+  (*                   outs) *)
+  (*                outs_graph *)
+  (*                [] in *)
+  (* warnings, errors *)

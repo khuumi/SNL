@@ -66,8 +66,8 @@ rule tokenize = parse
   | '"'      { read_string (Buffer.create 17) lexbuf }
 
   (* Special characters we use to mark end of programs/statements. *)
-  | eof   { EOF }
-  | "\n"+ { NEWLINE }  (* Empty lines are collapsed. *)
+  | eof { EOF }
+  | '\n'+ (whitespace|'\n')* { NEWLINE }  (* Empty lines are collapsed. *)
 
   (* Anything else is an illegal character. *)
   | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }

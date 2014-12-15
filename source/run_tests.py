@@ -94,11 +94,12 @@ def run_failing_tests():
     with open(os.devnull, 'wb') as DEVNULL:
         for test in failing_tests:
             try:
-                output = subprocess.check_output([AST_BIN, '-p', test],
+                output = subprocess.check_output([AST_BIN, '-j', test,
+                                                  '--output_path', os.devnull],
                                                  stderr=DEVNULL)
                 print '\nFAIL: %s' % test
                 TOTAL_FAIL += 1
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
                 TOTAL_PASS += 1
                 if args.v:
                     print 'PASS: %s' % test
