@@ -19,6 +19,6 @@ recipe test_stmts to x, y:
 done
 
 start main:
-  do show to test_stmts to 1, 42
-  do show to test_stmts to 0, 24
+  do show to do test_stmts to 1, 42
+  do show to do test_stmts to 0, 24
 done

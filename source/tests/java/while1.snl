@@ -9,7 +9,7 @@ loopstart:
 		i is i - 1
 		next loopstart)
 	else
-		next loopend
+		(next loopend)
 done
 
 loopend:
