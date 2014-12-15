@@ -1,7 +1,7 @@
 recipe test:
-	start start:
+	start starnt:
 		x is 5
-		do show to x
+		do show to x 
 	done
 done
 

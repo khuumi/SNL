@@ -1,15 +1,15 @@
 recipe gcd to x, y:
 	begin:
-		if x != y:
+		if x != y
 			(next loop)
-		else:
+		else
 			(return x)
 	done
 
 	loop:
-		if x > y:
+		if x > y
 			(x is x - y)
-		else:
+		else
 			(y is y -x)
 	done
 done

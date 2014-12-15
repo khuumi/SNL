@@ -1,5 +1,5 @@
 start iff:
-	if true:
+	if true
 		(do show to 42)
 	do show to 24
 done

@@ -1,4 +1,4 @@
 start id:
-	foo = "Hello world!"
+	foo is "Hello world!"
 	do show to foo
 done

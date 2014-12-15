@@ -5,6 +5,6 @@ recipe simple_add to a, b:
 done
 
 start main:
-	a is do add to 42, 24
-	do show to a
+	x is do add to 42, 24
+	do show to x
 done

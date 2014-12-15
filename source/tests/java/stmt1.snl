@@ -1,14 +1,14 @@
 recipe test_stmts to x, y:
 	start test:
 		i is 0
-		if x != 0:
+		if x != 0
 			(return y+3)
-		else:
+		else
 			(next forstart)
 	done
 
 	forstart:
-		if i < 5:
+		if i < 5
 			(b is y +5
 			y is y + 5
 			i is i + 1
