@@ -58,5 +58,10 @@ let _ =
      let any_error = recipe_errors || print_stage_diagnostics sast.stages in
      if any_error
      then exit 1
-     else ignore (Codegen.start_gen sast (path ^ name))
+     else write_out (path ^ name ^ ".java") (Codegen.gen_main sast.stages name);
+     ignore (List.map
+               (fun recipe -> write_out
+                                (path ^ "Recipe_" ^ recipe.rname ^ ".java")
+                                (Codegen.gen_recipe recipe))
+               sast.recipes)
      (*print_string (Ast.program_s ast)*)
