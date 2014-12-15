@@ -125,12 +125,12 @@ let rec to_string_stmt (statement : a_stmt) =
     | ABlock(e_list) -> 
         let list_of_strings = List.rev (List.fold_left 
                                           (fun list e ->
-                                             (to_string_expr e)::list) [] e_list) in
+                                             (to_string_expr e ^";\n")::list) [] e_list) in
         String.concat ""  list_of_strings
     | AIf(e, first, second) -> let expr_str = (to_string_expr e ) in 
       let first_str = to_string_stmt first in 
       let second_str = to_string_stmt second in 
-        "if(" ^  expr_str ^ ")\n{" ^  first_str ^ "}\n" ^ "else{" ^second_str ^ "}\n"
+        "if(" ^  expr_str ^ ".getBool())\n{" ^  first_str ^ "}\n" ^ "else{" ^second_str ^ "}\n"
 
 
 let to_string_stage (stage : a_stage) (is_recipe : bool) (formals : string list) : string = 
