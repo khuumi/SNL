@@ -1,28 +1,26 @@
-recipe print_1:
-	start print1:
-		do show to a
-	done
-done
-
-recipe print_2:
-	start print2:
-		do show to b
-	done
-done
-
-recipe increment:
-	start incr:
-		a is a + 1
-		b is b + 1
-	done
-done
-
 start main:
 	a is 42
 	b is 24
-	do print_1
-	do print_2
-	do increment
-	do print_1
-	do print_2
+    next print
 done
+
+print:
+    do show to a
+    next print2
+done
+
+increment:
+    a is a + 1
+    b is b + 1
+    next print3
+done
+print2:
+    do show to b
+    next increment
+done
+
+print3:
+    do show to a
+    do show to b
+done
+

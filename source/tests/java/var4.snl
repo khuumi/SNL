@@ -1,4 +1,3 @@
-
 recipe random to x:
 	start rand:
 		y is x
