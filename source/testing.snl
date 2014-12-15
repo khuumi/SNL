@@ -1,0 +1,51 @@
+recipe get_true:
+    start my_stage:
+        next other_stage
+    done
+
+    other_stage:
+        return true
+    done
+done
+
+recipe add_three to a: 
+    start lolz: 
+    return a + 3
+    done
+done
+
+start lolz:
+   not false
+  do show to -1
+  input
+do show to  [3, 4, "list", true, [3, 4], 4.7]
+
+mylist is [3, 4, 5, "list"]
+
+do show to 2 of mylist
+do show to "should equal 5"
+
+2 of mylist is 6
+do show to 2 of mylist
+do show to "should equal 6"
+
+if 2 > 4 and true = do get_true
+    (do show to "passed test")
+else 
+    (do show to "did not pass test")
+
+a is -1
+
+do show to a
+
+do show to (do add_three to a)
+
+next coolstage
+
+done
+
+coolstage: 
+    local a is 4
+    do show to a
+done
+

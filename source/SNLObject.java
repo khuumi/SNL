@@ -72,10 +72,6 @@ public class SNLObject{
         return type;
     }
 
-    public int getInt(){
-        return valueInt;
-    }
-
     private double getFloat(){
         return valueFloat;
     }
@@ -92,6 +88,10 @@ public class SNLObject{
 
     public SNLObject[] getArr(){
         return valueList;
+    }
+
+    public int getInt(){
+        return valueInt;
     }
 
     // helper method to check types
@@ -549,34 +549,14 @@ public class SNLObject{
         // return is null if something went wrong at runtime
         return snlo;
     }
-/*
-    // this is to get from the list
-    public SNLObject access(SNLObject index){
-
-        SNLObject snlo = null;
-
-        if(type.equals(listName))
-            snlo = valueList.get(index.getInt());          
-        
-        // return is null if something went wrong at runtime
-        return snlo;
-    }
-
-    // this is to set an element in the list
-    public void set(SNLObject index, SNLObject obj){
-
-        if(type.equals(listName))
-            valueList.set(index.getInt(), obj);          
-
-    }*/
 
     // this is to append an element to the list
     public void app(SNLObject obj){
-        System.out.println("NOT WORKING YET");
         SNLObject[] tmp = new SNLObject[valueList.length+1];
         System.arraycopy(valueList, 0, tmp, 0, valueList.length);
         if(type.equals(listName))
-            valueList[valueList.length] = obj;   
+            tmp[tmp.length-1] = obj;   
+        valueList = tmp;
     }
 
     // get the length of the list

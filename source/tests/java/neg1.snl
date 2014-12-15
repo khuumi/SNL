@@ -1,0 +1,3 @@
+start negate:
+    do show to -(-6)
+done
