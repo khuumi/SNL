@@ -1,0 +1,26 @@
+
+
+start main:
+  x is 7
+  
+  if x > 5
+  
+    (next my_stage)
+    
+  else
+  
+    (next invalid_stage)
+    
+done
+
+my_stage:
+
+  do show to 5
+  
+done
+
+my_other_stage:
+
+  do show to 10
+  
+done

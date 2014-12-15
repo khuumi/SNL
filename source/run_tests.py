@@ -94,11 +94,12 @@ def run_failing_tests():
     with open(os.devnull, 'wb') as DEVNULL:
         for test in failing_tests:
             try:
-                output = subprocess.check_output([AST_BIN, '-p', test],
+                output = subprocess.check_output([AST_BIN, '-j', test,
+                                                  '--output_path', os.devnull],
                                                  stderr=DEVNULL)
                 print '\nFAIL: %s' % test
                 TOTAL_FAIL += 1
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
                 TOTAL_PASS += 1
                 if args.v:
                     print 'PASS: %s' % test
@@ -115,37 +116,38 @@ def run_java_tests():
     compiler_tests = glob.glob('tests/java/*.snl')
     temp_dir = tempfile.mkdtemp()
     subprocess.call(['javac', '-d', temp_dir, 'SNLObject.java'])
-    for test in compiler_tests:
-        with open(test.replace('.snl', '.out'), 'r') as f:
-            expected_output = f.read()
-        try:
-            name = test[len('tests/java/'):-len('.snl')]
-            output = ''
-            subprocess.call([AST_BIN,
-                             '-j', test,
-                             '--output_path', temp_dir])
-            subprocess.call(['javac', '-d', temp_dir] +
-                            glob.glob(temp_dir + "/*.java"))
-            output = subprocess.check_output(['java',
-                                              '-classpath', temp_dir,
-                                              name])
-        except subprocess.CalledProcessError as e:
-            print 'Error processing %s\n' % test, e
-            TOTAL_FAIL += 1
-            continue
-        finally:
-            for f in os.listdir(temp_dir):
-                if f != 'SNLObject.class':
-                    os.remove(os.path.join(temp_dir, f))
-        if expected_output != output:
-            TOTAL_FAIL += 1
-            print '\nFAIL: %s' % test
-            print 'EXPECTED:\n%s' % expected_output
-            print 'ACTUAL:\n%s' % output
-        else:
-            TOTAL_PASS += 1
-            if args.v:
-                print 'PASS: %s' % test
+    with open(os.devnull, 'wb') as DEVNULL:
+        for test in compiler_tests:
+            with open(test.replace('.snl', '.out'), 'r') as f:
+                expected_output = f.read()
+            try:
+                name = test[len('tests/java/'):-len('.snl')]
+                subprocess.call([AST_BIN,
+                                 '-j', test,
+                                 '--output_path', temp_dir],
+                                stdout=DEVNULL)
+                subprocess.call(['javac', '-d', temp_dir] +
+                                glob.glob(temp_dir + "/*.java"))
+                output = subprocess.check_output(['java',
+                                                  '-classpath', temp_dir,
+                                                  name])
+            except subprocess.CalledProcessError as e:
+                print 'Error processing %s\n' % test, e
+                TOTAL_FAIL += 1
+                continue
+            finally:
+                for f in os.listdir(temp_dir):
+                    if f != 'SNLObject.class':
+                        os.remove(os.path.join(temp_dir, f))
+            if expected_output != output:
+                TOTAL_FAIL += 1
+                print '\nFAIL: %s' % test
+                print 'EXPECTED:\n%s' % expected_output
+                print 'ACTUAL:\n%s' % output
+            else:
+                TOTAL_PASS += 1
+                if args.v:
+                    print 'PASS: %s' % test
     shutil.rmtree(temp_dir)
     print 'Finished running compiler tests.\n'
 

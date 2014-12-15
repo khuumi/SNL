@@ -1,0 +1,24 @@
+       
+   
+start main:
+      
+  next my_stage
+  
+done
+  
+    
+  
+my_stage:
+        
+  do show to 5
+  
+done
+     
+    
+unused_stage:
+  
+  do show to "Unused!"
+  
+done
+     
+ 
