@@ -181,5 +181,7 @@ let gen_main (stages : a_stage list) (name : string) : string =
 
 
 let gen_recipe (recipe : a_recipe) : string =
+  Hashtbl.clear global_scope;
+  List.iter (fun formal -> Hashtbl.add global_scope formal formal) recipe.formals;
   make_header recipe.rname true ^
     to_string_stages recipe.body true recipe.formals
