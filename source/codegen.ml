@@ -73,7 +73,10 @@ let rec to_string_expr (expr : a_expr) : string =
     | AList(e_list, _) -> to_string_list e_list 
     | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
     | ACall(s, e_list, _) -> to_string_call s e_list
-    | AAccess(index_e, e, _) -> " first is the"
+    | AAccess(index_e, e, _) -> (to_string_expr e) ^
+                                ".getArr()[" ^
+                                (to_string_expr index_e) ^
+                                ".getInt()]"
 
 and to_string_unop (e : a_expr) (op : Ast.op) : string = 
   let string_op = 

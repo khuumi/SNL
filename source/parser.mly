@@ -66,7 +66,7 @@ expr:
   | LPAREN expr RPAREN         { $2 }
   | ids                        { $1 }
   | LBRACKET expr_seq RBRACKET { List($2) }
-  | ids ASSIGN expr            { Assign($1, $3) }
+  | expr ASSIGN expr           { Assign($1, $3) }
   | math                       { $1 }
   | logic                      { $1 }
   | recipe_app                 { $1 }
@@ -119,10 +119,10 @@ recipe_app:
 /* A statement is either an expression or an if-else construct. */
 stmt:
     expr NEWLINE { Expr($1) }
-  | IF expr NEWLINE LPAREN block_builder RPAREN NEWLINE
-    ELSE opt_nl LPAREN block_builder RPAREN
+  | IF expr NEWLINE LPAREN block_builder RPAREN opt_nl
+    ELSE opt_nl LPAREN block_builder RPAREN NEWLINE
       { If($2, Block(List.rev $5), Block(List.rev $11)) }
-  | IF expr NEWLINE LPAREN block_builder RPAREN %prec NOELSE
+  | IF expr NEWLINE LPAREN block_builder RPAREN NEWLINE %prec NOELSE
       { If($2, Block(List.rev $5), Block([])) }
 
 
@@ -134,7 +134,7 @@ block_builder:
 
 
 stage_body:
-    stmt            { [$1] }
+    stmt                    { [$1] }
   | stage_body stmt { $2 :: $1 }
 
 
@@ -153,8 +153,8 @@ formal_list:
 
 
 stage_seq:
-    stage           { [$1] }
-  | stage_seq stage { $2 :: $1 }
+    stage                  { [$1] }
+  | stage_seq opt_nl stage { $3 :: $1 }
 
 
 recipe:
