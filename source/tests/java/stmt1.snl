@@ -7,17 +7,15 @@ recipe test_stmts to x, y:
     i is 0
 
     if x != 0
-
-      (return y+3)
-
+      (return y + 3)
     else
 
       (next forstart)
 
-done
+  done
 
 
-forstart:
+  forstart:
 
   if i < 5
 
