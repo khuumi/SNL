@@ -1,24 +1,47 @@
+
+
 recipe test_stmts to x, y:
+
   start test:
+
     i is 0
+
     if x != 0
       (return y + 3)
     else
+
       (next forstart)
+
   done
+
 
   forstart:
-    if i < 5
-      (b is y + 5
-       y is y + 5
-       i is i + 1
-       next forstart)
-     else
-       (return b)
+
+  if i < 5
+
+    (b is y +5
+
+    y is y + 5
+
+    i is i + 1
+
+    next forstart)
+
+  else
+
+      (return b)
+
   done
+
 done
 
+
 start main:
-  do show to test_stmts to 1, 42
-  do show to test_stmts to 0, 24
+
+  do show to do test_stmts to 1, 42
+
+  do show to do test_stmts to 0, 24
+
 done
+
+
