@@ -66,7 +66,9 @@ and to_string_unop (e : a_expr) (op : Ast.op) : string =
   let string_op = 
     match op with 
       Negate -> "neg"
-    | Not -> "not" in (to_string_expr e) ^ "." ^ string_op ^ "()"
+    | Not -> "not" 
+    | _ -> "Error" in 
+     (to_string_expr e) ^ "." ^ string_op ^ "()"
 
 
 and to_string_binop (e1 : a_expr) (e2 : a_expr) (op : Ast.op) = 
@@ -83,7 +85,8 @@ and to_string_binop (e1 : a_expr) (e2 : a_expr) (op : Ast.op) =
     | Lt -> "lt"
     | Leq -> "leq" 
     | And -> "and"
-    | Or -> "or" in 
+    | Or -> "or"
+    | _ -> "ERROR" in 
   (to_string_expr e1) ^ "." ^ string_op ^ "(" ^ (to_string_expr e2) ^ ")"
 
 
