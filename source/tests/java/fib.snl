@@ -1,22 +1,22 @@
 recipe fib to x:
-	start fib:
-		if (x < 2):
-			return 1
-		else: 
-			return (do fib to x -1) + (do fib to x -2)
-	done
+  start fib:
+    if x < 2
+      (return 1)
+    else
+      (return (do fib to x -1) + (do fib to x -2))
+  done
 done
 
-start:
-	do show to do fib to 0
-	do show to ""
-	do show to do fib to 1
-	do show to ""
-	do show to do fib to 2
-	do show to ""
-	do show to do fib to 3
-	do show to ""
-	do show to do fib to 5
-	do show to ""
-	do show to do fib to 10
+start main:
+  do show to do fib to 0
+  do show to ""
+  do show to do fib to 1
+  do show to ""
+  do show to do fib to 2
+  do show to ""
+  do show to do fib to 3
+  do show to ""
+  do show to do fib to 5
+  do show to ""
+  do show to do fib to 10
 done

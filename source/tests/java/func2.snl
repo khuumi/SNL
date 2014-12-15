@@ -1,10 +1,10 @@
 recipe simple_add to a, b:
-	start simple:
-		return a + b
-	done
+  start simple:
+    return a + b
+  done
 done
 
 start main:
-	a is do add to 42, 24
-	do show to a
+  a is do simple_add to 42, 24
+  do show to a
 done

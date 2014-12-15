@@ -1,13 +1,13 @@
 recipe test:
-	start start:
-		x is 5
-		do show to x
-	done
+  start my_stage:
+    x is 5
+    do show to x
+  done
 done
 
 start dummy:
-	do test
-	x is 10 + x
-	do show to x
+  do test
+  x is 10
+  do show to x
 done
 

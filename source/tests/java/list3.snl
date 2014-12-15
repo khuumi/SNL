@@ -1,4 +1,4 @@
 start list3:
-	list is [4 + 6, true || false, "hello" + " world", -(-10.0)]
+	list is [4 + 6, true or false, "hello" + " world", -(-10.0)]
 	do show to list
 done

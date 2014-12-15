@@ -172,8 +172,8 @@ recipe:
 
 program:
     /* nothing */         { { recipes = [];
-                              stages = [] } }
+                              stages = []; } }
   | program stage opt_nl  { { recipes = $1.recipes;
-                              stages = $2 :: $1.stages } }
+                              stages = $2 :: $1.stages; } }
   | program recipe opt_nl { { recipes = $2 :: $1.recipes;
-                              stages = $1.stages } }
+                              stages = $1.stages; } }
