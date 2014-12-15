@@ -3,6 +3,7 @@ open Sast
 open Ast
 
 let global_scope = Hashtbl.create 1000;; 
+let local_scope = Hashtbl.create 1000;;
 
 let write_out (filename : string) (buffer : string) =
   let file = (open_out_gen [Open_creat; Open_wronly;
@@ -55,7 +56,10 @@ let to_string_const (const : a_constant)  : string =
 
 let to_string_id (name : string ) (scope : Ast.scope) : string = 
   match scope with 
-      Local -> "TODO: local scoped variable"
+      Local -> (match Hashtbl.mem local_scope name with
+                     true -> name
+                   | false->  Hashtbl.add local_scope name name; "SNLObject " ^ name)
+            
     | Global -> (match Hashtbl.mem global_scope name with
                      true -> ()
                    | false->  Hashtbl.add global_scope name name);
@@ -73,7 +77,10 @@ let rec to_string_expr (expr : a_expr) : string =
     | AList(e_list, _) -> to_string_list e_list 
     | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
     | ACall(s, e_list, _) -> to_string_call s e_list
-    | AAccess(index_e, e, _) -> " first is the"
+    | AAccess(index_e, e, _) -> (to_string_expr e) ^
+                                ".getArr()[" ^
+                                (to_string_expr index_e) ^
+                                ".getInt()]"
 
 and to_string_unop (e : a_expr) (op : Ast.op) : string = 
   let string_op = 
@@ -127,6 +134,7 @@ let rec to_string_stmt (statement : a_stmt) =
 
 
 let to_string_stage (stage : a_stage) (is_recipe : bool) (formals : string list) : string = 
+  Hashtbl.clear local_scope;
   let header = "private static void " ^ stage.sname ^ "(){\n" in
   let initial_header = match stage.is_start with
       true -> get_initial_stage_header stage.sname is_recipe formals
