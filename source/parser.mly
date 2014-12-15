@@ -170,10 +170,19 @@ recipe:
           body = List.rev $7; } }
 
 
+program_body:
+    stage opt_nl               { { recipes = [];
+                                   stages = [$1]; } }
+  | recipe opt_nl              { { recipes = [$1];
+                                   stages = []; } }
+  | stage opt_nl program_body  { { recipes = $3.recipes;
+                                   stages = $1 :: $3.stages; } }
+  | recipe opt_nl program_body { { recipes = $1 :: $3.recipes;
+                                   stages = $3.stages; } }
+
+
 program:
-    /* nothing */         { { recipes = [];
-                              stages = []; } }
-  | program stage opt_nl  { { recipes = $1.recipes;
-                              stages = $2 :: $1.stages; } }
-  | program recipe opt_nl { { recipes = $2 :: $1.recipes;
-                              stages = $1.stages; } }
+    /* nothing */        { { recipes = [];
+                             stages = []; } }
+  | program_body         { $1 }
+  | NEWLINE program_body { $2 }
