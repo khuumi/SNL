@@ -114,6 +114,7 @@ def run_java_tests():
     print 'Running compiler tests...'
     compiler_tests = glob.glob('tests/java/*.snl')
     temp_dir = tempfile.mkdtemp()
+    subprocess.call(['javac', '-d', temp_dir, 'SNLObject.java'])
     for test in compiler_tests:
         with open(test.replace('.snl', '.out'), 'r') as f:
             expected_output = f.read()
@@ -124,7 +125,6 @@ def run_java_tests():
                              '-j', test,
                              '--output_path', temp_dir])
             subprocess.call(['javac', '-d', temp_dir,
-                              'SNLObject.java',
                               os.path.join(temp_dir, name + '.java')])
             output = subprocess.check_output(['java',
                                               '-classpath', temp_dir,
@@ -133,6 +133,10 @@ def run_java_tests():
             print 'Error processing %s\n' % test, e
             TOTAL_FAIL += 1
             continue
+        finally:
+            for f in os.listdir(temp_dir):
+                if f != 'SNLObject.class':
+                    os.remove(os.path.join(temp_dir, f))
         if expected_output != output:
             TOTAL_FAIL += 1
             print '\nFAIL: %s' % test
