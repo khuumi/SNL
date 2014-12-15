@@ -19,9 +19,9 @@ let get_initial_stage_header (start_stage_name : string)
                                  (fun name -> name ^ " = new SNLObject(" ^
                                                 name ^ "_arg);\n") formals in 
             let constructs = (String.concat "" args_in_body) in 
-            initial ^ perform_args ^ constructs ^ start_stage_name ^
+            initial ^ perform_args ^ constructs ^"s_" ^ start_stage_name ^
               "();\nreturn ret;\n}\n" 
-  | false -> "\n public static void main(String args[]){\n" ^ start_stage_name ^
+  | false -> "\n public static void main(String args[]){\ns_" ^ start_stage_name ^
                "();\n}\n"
 
 
@@ -51,7 +51,7 @@ let rec to_string_expr (expr : a_expr) : string =
   | AUnop(op, e, _) ->  to_string_unop e op
   | ABinop(e1, op, e2, _) -> to_string_binop e1 e2 op
   | AAssign(e1, e2) -> to_string_expr e1 ^  "= " ^ to_string_expr e2
-  | ANext(s, _) -> s ^ "()"
+  | ANext(s, _) -> "s_" ^ s ^ "()"
   | AReturn(e, _) -> "ret = " ^ (to_string_expr e) ^ ";\n" ^ "return" 
   | AList(e_list, _) -> to_string_list e_list 
   | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
@@ -138,8 +138,8 @@ let to_string_stage (stage : a_stage)
                     (formals : string list) : string = 
   Hashtbl.clear local_scope;
   let header = 
-    if is_recipe then "private void " ^ stage.sname ^ "(){\n"
-    else "private static void " ^ stage.sname ^ "(){\n"   
+    if is_recipe then "private void s_" ^ stage.sname ^ "(){\n"
+    else "private static void s_" ^ stage.sname ^ "(){\n"   
     in 
   let initial_header =
     if stage.is_start
