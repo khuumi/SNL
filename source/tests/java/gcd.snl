@@ -1,0 +1,20 @@
+recipe gcd to x, y:
+	begin:
+		if x != y:
+			(next loop)
+		else:
+			(return x)
+	done
+
+	loop:
+		if x > y:
+			(x is x - y)
+		else:
+			(y is y -x)
+	done
+done
+
+start main:
+	x is do gcd to 5, 10
+	do show to x
+done

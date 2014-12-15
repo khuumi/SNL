@@ -1,0 +1,7 @@
+start if4:
+	if false:
+		(do show to 42)
+	else:
+		(do show to 11)
+	do show to 24
+done

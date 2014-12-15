@@ -1,0 +1,26 @@
+start ops:
+	do show to 1 + 2
+	do show to 1 - 2
+	do show to 1 * 2
+	do show to 10 / 2
+	do show to 1910
+	do show to 1 = 2
+	do show to 2 = 2
+	do show to 1910
+	do show to 1 != 2
+	do show to 2 != 2
+	do show to 1910
+	do show to 1 < 2
+	do show to 3 < 2
+	do show to 1910
+	do show to 1 <= 2
+	do show to 1 <= 1
+	do show to 2 <= -1
+	do show to 1910
+	do show to 1 > 2
+	do show to 1 < 2
+	do show to 1910
+	do show to 1 >= 2
+	do show to 2 >= 2
+	do show to 2 >= 1
+done

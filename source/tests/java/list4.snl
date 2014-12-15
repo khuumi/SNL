@@ -1,0 +1,4 @@
+start list:
+	lst = [5.0, not false]
+	do show to lst
+done

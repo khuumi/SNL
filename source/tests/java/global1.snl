@@ -1,0 +1,8 @@
+start first:
+	x is 5
+	next second
+done
+
+second: 
+	do show to x + 5
+done

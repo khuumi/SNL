@@ -1,0 +1,4 @@
+start id:
+	foo = "Hello world!"
+	do show to foo
+done

@@ -1,0 +1,13 @@
+recipe test:
+	start start:
+		x is 5
+		do show to x
+	done
+done
+
+start dummy:
+	do test
+	x is 10 + x
+	do show to x
+done
+

@@ -1,0 +1,15 @@
+
+recipe random to x:
+	start rand:
+		y is a
+		do show to y
+		a is x
+		do show to a
+	done
+done
+
+start random:
+	a is 15
+	do random to 60
+	do show to a
+done
