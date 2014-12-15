@@ -30,11 +30,33 @@ let get_initial_stage_header (start_stage_name : string) (is_recipe : bool) (for
                 "();\n}\n"
 
 
+(* name should be the file name of the snl file without any extensions. *)
+let make_main_header (name : string) : string =
+  let scanner = "import java.util.Scanner;\n" in 
+  let scanner2 = "\tprivate static Scanner input = new Scanner(System.in);" in 
+  scanner ^ "public class " ^ name ^ "{\n" ^ scanner2
+
+
+let make_recipe_header (name : string) : string =
+  let scanner = "import java.util.Scanner;\n" in 
+  let scanner2 = "\tprivate static Scanner input = new Scanner(System.in);" in 
+  scanner ^ "public final class " ^ "Recipe_" ^ name ^ "{\n" ^
+    "\tprivate static SNLObject ret;\n" ^ scanner2
+
+
+let make_header_new (name : string) (is_recipe : bool) =
+  let scanner = "import java.util.Scanner;\n" in 
+  let scanner2 = "\tprivate static Scanner input = new Scanner(System.in);" in 
+  if is_recipe
+  then scanner ^ "public final class " ^ "Recipe_" ^ name ^ "{\n" ^
+         "\tprivate static SNLObject ret;\n" ^ scanner2
+  else scanner ^ "public class " ^ name ^ "{\n" ^ scanner2
+
+
 let make_header (filename : string) (is_recipe : bool) =
   let scanner = "import java.util.Scanner;\n" in 
   let scanner2 = "\tprivate static Scanner input = new Scanner(System.in);" in 
-
-    match is_recipe with 
+  match is_recipe with 
         true -> let path = "Recipe_" ^ filename ^ ".java" in
         if Sys.file_exists path then Sys.remove path;
             let header = scanner ^ "public final class " ^ "Recipe_" ^ filename ^ "{\n"
@@ -67,6 +89,7 @@ let to_string_id (name : string ) (scope : Ast.scope) : string =
                    | false->  Hashtbl.add global_scope name name);
                 name    
 
+
 let rec to_string_expr (expr : a_expr) : string = 
   match expr with 
       AConstant(const) -> to_string_const const
@@ -83,6 +106,7 @@ let rec to_string_expr (expr : a_expr) : string =
                                 ".getArr()[" ^
                                 (to_string_expr index_e) ^
                                 ".getInt()]"
+
 
 and to_string_unop (e : a_expr) (op : Ast.op) : string = 
   let string_op = 
@@ -149,13 +173,15 @@ let to_string_stage (stage : a_stage) (is_recipe : bool) (formals : string list)
 let to_string_stages (stages : a_stage list) (is_recipe : bool) 
       (formals : string list) = 
   let list_of_strings = List.rev
-                          ( List.fold_left 
-                                     (fun list s ->
-                                        (to_string_stage s is_recipe formals)::list ) [] stages) in 
+                          (List.fold_left 
+                             (fun list s ->
+                              (to_string_stage s is_recipe formals) :: list)
+                             []
+                             stages) in 
   let global_vars = Hashtbl.fold (fun k v acc ->
-                                    "private static SNLObject "
-                                    ^ k ^ ";\n" ^ acc) global_scope "" in 
-    (String.concat "" list_of_strings) ^ global_vars ^ "}" 
+                                  "private static SNLObject "
+                                  ^ k ^ ";\n" ^ acc) global_scope "" in 
+  (String.concat "" list_of_strings) ^ global_vars ^ "}" 
 
 
 let print_recipe (recipe : a_recipe) = 
@@ -178,3 +204,12 @@ let start_gen (sast : a_program) (name : string) =
     sast.recipes;
   make_header name false;
   write_out name (to_string_stages sast.stages false [])
+
+
+let gen_main (stages : a_stage list) (name : string) : string =
+  make_header_new name false ^ to_string_stages stages false []
+
+
+let gen_recipe (recipe : a_recipe) : string =
+  make_header_new recipe.rname true ^
+    to_string_stages recipe.body true recipe.formals
