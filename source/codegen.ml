@@ -10,7 +10,7 @@ let get_initial_stage_header (start_stage_name : string)
                              (is_recipe : bool)
                              (formals : string list) =
   match is_recipe with
-    true -> let initial = "\n \tpublic static SNLObject perform(" in 
+    true -> let initial = "\n \tpublic SNLObject perform(" in 
             let list_of_args = List.map 
                                  (fun name -> "SNLObject " ^ name ^ "_arg")
                                  formals in
@@ -103,7 +103,7 @@ and to_string_call (name : string) (e_list : a_expr list) : string =
                                            (to_string_expr e) :: list)
                                           []
                                           e_list) in 
-         "Recipe_" ^ name ^ ".perform(" ^
+         "new Recipe_" ^ name ^ "().perform(" ^
            (String.concat ", " list_e_strings) ^ ")"
 
 
@@ -137,7 +137,10 @@ let to_string_stage (stage : a_stage)
                     (is_recipe : bool)
                     (formals : string list) : string = 
   Hashtbl.clear local_scope;
-  let header = "private static void " ^ stage.sname ^ "(){\n" in
+  let header = 
+    if is_recipe then "private void " ^ stage.sname ^ "(){\n"
+    else "private static void " ^ stage.sname ^ "(){\n"   
+    in 
   let initial_header =
     if stage.is_start
     then get_initial_stage_header stage.sname is_recipe formals
@@ -159,9 +162,14 @@ let to_string_stages (stages : a_stage list)
                               (to_string_stage s is_recipe formals) :: list)
                              []
                              stages) in 
-  let global_vars = Hashtbl.fold (fun k v acc ->
+  let global_vars = 
+    if is_recipe then Hashtbl.fold (fun k v acc ->
+                                  "private SNLObject "
+                                  ^ k ^ ";\n" ^ acc) global_scope "" 
+    else Hashtbl.fold (fun k v acc ->
                                   "private static SNLObject "
-                                  ^ k ^ ";\n" ^ acc) global_scope "" in 
+                                  ^ k ^ ";\n" ^ acc) global_scope ""
+    in 
   (String.concat "" list_of_strings) ^ global_vars ^ "}"
 
 
@@ -169,11 +177,12 @@ let to_string_stages (stages : a_stage list)
    without any extensions. *)
 let make_header (name : string) (is_recipe : bool) : string =
   let scanner = "import java.util.Scanner;\n" in 
-  let scanner2 = "\tprivate static Scanner input = new Scanner(System.in);" in 
   if is_recipe
-  then scanner ^ "public final class " ^ "Recipe_" ^ name ^ "{\n" ^
-         "\tprivate static SNLObject ret;\n" ^ scanner2
-  else scanner ^ "public class " ^ name ^ "{\n" ^ scanner2
+  then let scanner2 = "\tprivate  Scanner input = new Scanner(System.in);" in 
+        scanner ^ "public class " ^ "Recipe_" ^ name ^ "{\n" ^
+         "\tprivate SNLObject ret;\n" ^ scanner2 ^ "\npublic Recipe_" ^ name ^"(){}\n"
+  else let scanner2 = "\tprivate static Scanner input = new Scanner(System.in);" in 
+        scanner ^ "public class " ^ name ^ "{\n" ^ scanner2
 
 
 let gen_main (stages : a_stage list) (name : string) : string =
