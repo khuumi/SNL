@@ -98,7 +98,17 @@ and to_string_call (name : string) (e_list : a_expr list) : string =
                                                []
                                                e_list) in
               "System.out.println(" ^ (String.concat " + " list_e_strings) ^")"
-  | _ -> let list_e_strings = List.rev (List.fold_left 
+    | "remove" -> let lst = to_string_expr (List.nth e_list 0) in 
+                  let index = to_string_expr (List.nth e_list 1) in
+            lst ^ ".remove(" ^ index ^ ")" 
+    | "insert" -> let lst = to_string_expr (List.nth e_list 0) in 
+      let item_to_add = (to_string_expr (List.nth e_list 1)) in 
+      let index = to_string_expr (List.nth e_list 2) in 
+        lst ^ ".insert("^ index ^ ", " ^  item_to_add ^ ")"
+    | "append" -> let lst = to_string_expr (List.nth e_list 0) in 
+      let item_to_add = to_string_expr (List.nth e_list 1) in 
+        lst ^ ".app(" ^ item_to_add ^ ")"
+    | _ -> let list_e_strings = List.rev (List.fold_left 
                                           (fun list e ->
                                            (to_string_expr e) :: list)
                                           []

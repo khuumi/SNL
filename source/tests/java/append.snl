@@ -1,0 +1,8 @@
+start first:
+    lst is [1,"lol",3,4]
+    do show to lst
+    do append to lst, "appended"
+    do show to lst
+    do append to lst, "second"
+    do show to lst
+done

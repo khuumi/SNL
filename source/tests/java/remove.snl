@@ -4,4 +4,6 @@ start first:
     do remove to lst, 0
     do remove to lst, 0
     do show to lst
+    do remove to lst, 1
+    do show to lst
 done

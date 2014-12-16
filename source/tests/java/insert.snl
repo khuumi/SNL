@@ -1,8 +1,8 @@
 start first:
     lst is [1,2,3,4]
     do show to lst
-    do put to lst, "appended"
+    do insert to lst, "inserted", 1
     do show to lst
-    do put to lst, "second", 1
+    do insert to lst, "second", 3
     do show to lst
 done
