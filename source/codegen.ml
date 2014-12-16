@@ -113,6 +113,8 @@ and to_string_call (name : string) (e_list : a_expr list) : string =
                 lst ^ ".length()"
   | "word_to_number" -> let word = to_string_expr (List.nth e_list 0) in
                         word ^ ".word_to_number()"
+  | "number_to_word" -> let word = to_string_expr (List.nth e_list 0) in
+                        word ^ ".number_to_word()"
   | _ -> let list_e_strings = List.rev (List.fold_left
                                           (fun list e ->
                                            (to_string_expr e) :: list)
