@@ -1,0 +1,8 @@
+start list_stage: 
+    lst is ["hi", "people"]
+    len is do length to lst
+    do show to len
+    do append to lst, "1"
+    len is do length to lst
+    do show to len
+done
