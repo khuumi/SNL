@@ -5,6 +5,10 @@ open Sast
 module StringMap = Map.Make(String);;
 module StringSet = Set.Make(String);;
 
+  
+let lib_funcs = [("show", 1); ("remove", 2); ("insert", 3);
+                 ("append", 2); ("length", 1)];;
+
 
 (* A symbol table wich includes a parent symbol table
    and variables which are tuples of stings and Sast types *)
@@ -311,7 +315,7 @@ let generate_call_diagnostics (recipes : Sast.a_recipe list)
   let rformals = List.fold_left
                    (fun l r -> (r.rname, List.length r.formals) :: l)
                    []
-                   recipes in
+                   recipes @ lib_funcs in
   List.fold_left
     (fun list stage ->
      (List.fold_left
@@ -323,8 +327,8 @@ let generate_call_diagnostics (recipes : Sast.a_recipe list)
                  " does not refer to a defined recipe.") :: l
          else let ecount = List.assoc name rformals in
               if ecount != count
-              then ("Error: call to " ^ name ^ " expects " ^
-                      (string_of_int ecount) ^ " arguments but " ^
+              then ("Error in stage " ^ stage.sname ^ ": call to " ^ name ^
+                      " expects " ^ (string_of_int ecount) ^ " arguments but " ^
                         (string_of_int count) ^ " provided.") :: l
               else l)
         []
@@ -334,10 +338,33 @@ let generate_call_diagnostics (recipes : Sast.a_recipe list)
 
 
 (* Returns a list of diagnostics (warnings and errors) and whether any of the
-   diagnostics are failing errors. *)
+   diagnostics are fatal errors. *)
 let generate_diagnostics (p : Sast.a_program) : string list * bool =
-  let rerrors = generate_recipe_diagnostics p.recipes
-  and swarnings, serrors = generate_stage_diagnostics p.stages
-  and cerrors = generate_call_diagnostics p.recipes p.stages in
-  let all_diagnostics = rerrors @ swarnings @ serrors @ cerrors in
-  all_diagnostics, List.length all_diagnostics - List.length swarnings > 0
+  let r_format name str = "In recipe " ^ name ^ ": " ^ str in
+  let r_internal_call_errors =
+    List.concat (List.map
+                   (fun r -> List.map
+                               (fun str -> r_format r.rname str)
+                               (generate_call_diagnostics p.recipes r.body))
+                   p.recipes)
+  and r_internal_diagnostics, has_r_internal_errors =
+    List.fold_left
+      (fun pair r -> let r_internal_s_warnings, r_internal_s_errors =
+                       generate_stage_diagnostics r.body in
+                     ((fst pair) @
+                        (List.map
+                           (fun str -> r_format r.rname str)
+                           r_internal_s_warnings) @
+                          (List.map
+                             (fun str -> r_format r.rname str)
+                             r_internal_s_errors)),
+                      snd pair || List.length r_internal_s_errors > 0)
+      ([], false)
+      p.recipes
+  and r_errors = generate_recipe_diagnostics p.recipes
+  and s_warnings, s_errors = generate_stage_diagnostics p.stages
+  and c_errors = generate_call_diagnostics p.recipes p.stages in
+  let all_diagnostics = (r_errors @ s_warnings @ s_errors @ c_errors @
+                         r_internal_call_errors @ r_internal_diagnostics) in
+  all_diagnostics, (has_r_internal_errors ||
+                      List.length all_diagnostics - List.length s_warnings > 0)

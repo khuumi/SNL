@@ -5,8 +5,6 @@ open Sast
 
 let global_scope = Hashtbl.create 1000;;
 let local_scope = Hashtbl.create 1000;;
-let lib_funcs = [("show", 1); ("remove", 2); ("insert", 3);
-                 ("append", 2); ("length", 1)];;
 
 
 let get_initial_stage_header (start_stage_name : string)

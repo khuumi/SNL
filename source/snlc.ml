@@ -51,4 +51,3 @@ let _ =
                                 (path ^ "Recipe_" ^ recipe.rname ^ ".java")
                                 (Codegen.gen_recipe recipe))
                sast.recipes)
-     (*print_string (Ast.program_s ast)*)
