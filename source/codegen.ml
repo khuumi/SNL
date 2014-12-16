@@ -51,7 +51,7 @@ let rec to_string_expr (expr : a_expr) : string =
   | AUnop(op, e, _) ->  to_string_unop e op
   | ABinop(e1, op, e2, _) -> to_string_binop e1 e2 op
   | AAssign(e1, e2) -> to_string_expr e1 ^  "= " ^ to_string_expr e2
-  | ANext(s, _) -> "s_" ^ s ^ "()"
+  | ANext(s, _) -> "s_" ^ s ^ "();\nreturn"
   | AReturn(e, _) -> "ret = " ^ (to_string_expr e) ^ ";\n" ^ "return" 
   | AList(e_list, _) -> to_string_list e_list 
   | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
