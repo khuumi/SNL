@@ -38,7 +38,7 @@
 
 %%
 
-/* An optional newline. */
+/* Matches NEWLINE* */
 opt_nl:
     /* nothing */  { }
   | NEWLINE opt_nl { }
@@ -124,19 +124,19 @@ recipe_app:
 
 /* A statement is either an expression or an if-else construct. */
 stmt:
-    expr NEWLINE { Expr($1) }
-  | IF expr NEWLINE LPAREN block_builder RPAREN opt_nl
-    ELSE opt_nl LPAREN block_builder RPAREN NEWLINE
+    expr multi_nl { Expr($1) }
+  | IF expr multi_nl LPAREN block_builder RPAREN opt_nl
+    ELSE opt_nl LPAREN block_builder RPAREN multi_nl
       { If($2, Block(List.rev $5), Block(List.rev $11)) }
-  | IF expr NEWLINE LPAREN block_builder RPAREN NEWLINE %prec NOELSE
+  | IF expr multi_nl LPAREN block_builder RPAREN multi_nl %prec NOELSE
       { If($2, Block(List.rev $5), Block([])) }
 
 
 /* A block is a sequence of expr separated by newlines that appears in an
    if statement. */
 block_builder:
-    expr                       { [$1] }
-  | block_builder NEWLINE expr { $3 :: $1 }
+    expr                        { [$1] }
+  | block_builder multi_nl expr { $3 :: $1 }
 
 
 stage_body:
@@ -145,12 +145,12 @@ stage_body:
 
 
 stage:
-    ID COLON NEWLINE stage_body DONE       { { sname = $1;
-                                               body = List.rev $4;
-                                               is_start = false } }
-  | START ID COLON NEWLINE stage_body DONE { { sname = $2;
-                                               body = List.rev $5;
-                                               is_start = true } }
+    ID COLON multi_nl stage_body DONE       { { sname = $1;
+                                                body = List.rev $4;
+                                                is_start = false } }
+  | START ID COLON multi_nl stage_body DONE { { sname = $2;
+                                                body = List.rev $5;
+                                                is_start = true } }
 
 
 formal_list:
@@ -164,12 +164,12 @@ stage_seq:
 
 
 recipe:
-    RECIPE ID COLON NEWLINE
+    RECIPE ID COLON multi_nl
     stage_seq opt_nl DONE
       { { rname = $2;
           formals = [];
           body = List.rev $5; } }
-  | RECIPE ID TO formal_list COLON NEWLINE
+  | RECIPE ID TO formal_list COLON multi_nl
     stage_seq opt_nl DONE
       { { rname = $2;
           formals = List.rev $4;
