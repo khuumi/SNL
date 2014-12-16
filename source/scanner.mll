@@ -2,6 +2,8 @@
 
 let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\r']
+let comment = "#" [^ '\n']* "\n"
+let ws_strip = (whitespace|comment|'\n')*
 
 
 rule tokenize = parse
@@ -9,7 +11,7 @@ rule tokenize = parse
     whitespace { tokenize lexbuf }
 
   (* Comments. *)
-  | "#"      { comment lexbuf }
+  | comment { tokenize lexbuf }
 
   (* Binary operators: math, comparison, and logic. *)
   | "+"      { PLUS }
@@ -28,15 +30,15 @@ rule tokenize = parse
 
   (* Control flow. *)
   | "if"                      { IF }
-  | ("\n"|whitespace)* "else" { ELSE }
+  | ws_strip "else" { ELSE }
 
   (* Function calls. *)
   | "do"     { DO }
   | "to"     { TO }
 
   (* Used for grouping things and creating lists. *)
-  | "(" (whitespace|'\n')*  { LPAREN }
-  | (whitespace|'\n')* ")"  { RPAREN }
+  | "(" ws_strip  { LPAREN }
+  | ws_strip ")"  { RPAREN }
   | "["                     { LBRACKET }
   | "]"                     { RBRACKET }
   | ","                     { COMMA }
@@ -67,15 +69,11 @@ rule tokenize = parse
 
   (* Special characters we use to mark end of programs/statements. *)
   | eof { EOF }
-  | '\n'+ (whitespace|'\n')* { NEWLINE }  (* Empty lines are collapsed. *)
+  | '\n'+ ws_strip { NEWLINE }  (* Empty lines are collapsed. *)
 
   (* Anything else is an illegal character. *)
   | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
-(* Comments do not nest and are only single-line. *)
-and comment = parse
-    "\n" { tokenize lexbuf }
-  | _    { comment lexbuf }
 
 (* Read in string literals. The code is from
 https://realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html *)
