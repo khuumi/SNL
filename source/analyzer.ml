@@ -5,6 +5,10 @@ open Sast
 module StringMap = Map.Make(String);;
 module StringSet = Set.Make(String);;
 
+  
+let lib_funcs = [("show", 1); ("remove", 2); ("insert", 3);
+                 ("append", 2); ("length", 1)];;
+
 
 (* A symbol table wich includes a parent symbol table
    and variables which are tuples of stings and Sast types *)
@@ -235,31 +239,132 @@ let generate_stage_flow_diagnostics (stages : Sast.a_stage list) :
      []), errors
 
 
-(* Returns a list of warnings and a list of errors. *)
+(* Checks for duplicate strings in a list and returns the duplicates. *)
+let dup_string_check (names : string list) : string list =
+  StringMap.fold
+    (fun name count dups ->
+     if count > 1
+     then name :: dups
+     else dups)
+    (List.fold_left
+       (fun map name ->
+        if StringMap.mem name map
+        then StringMap.add name ((StringMap.find name map) + 1) map
+        else StringMap.add name 1 map)
+       StringMap.empty
+       names)
+    []
+
+
+(* Returns a list of warnings and a list of errors.
+   Warnings: if any stages are unreachable in the program.
+   Errors: if multiple stages have the same name,
+           if the number of stages marked start is not exactly one,
+           if any stages try to call 'next' to a stage that was not defined.
+*)
 let generate_stage_diagnostics (stages : Sast.a_stage list) :
       string list * string list =
   let snames = List.map (fun s -> s.sname) stages in
   let dup_name_errors =
-    StringMap.fold
-      (fun name count errors ->
-       if count > 1
-       then ("Error: multiple stages named " ^ name ^ ".") :: errors
-       else errors)
-      (List.fold_left
-         (fun map name ->
-          if StringMap.mem name map
-          then StringMap.add name ((StringMap.find name map) + 1) map
-          else StringMap.add name 1 map)
-         StringMap.empty
-         snames)
-      []
-  and num_starts = List.length (List.filter (fun s -> s.is_start) stages)
-  in let errors =
-       if num_starts > 1
-       then ["Error: more than one stage is marked start."] @ dup_name_errors
-       else if num_starts < 1
-       then ["Error: no stages marked start."] @ dup_name_errors
-       else dup_name_errors
-  in if List.length errors > 0
-     then [], errors
-     else generate_stage_flow_diagnostics stages
+    List.map
+      (fun name -> "Error: multiple stages named " ^ name ^ ".")
+      (dup_string_check snames)
+  and num_starts = List.length (List.filter (fun s -> s.is_start) stages) in
+  let errors =
+    if num_starts > 1
+    then ["Error: more than one stage is marked start."] @ dup_name_errors
+    else if num_starts < 1
+    then ["Error: no stages marked start."] @ dup_name_errors
+    else dup_name_errors in
+  if List.length errors > 0
+  then [], errors
+  else generate_stage_flow_diagnostics stages
+
+
+(* Check if multiple recipes have the same name. Returns a list of errors. *)
+let generate_recipe_diagnostics (recipes : Sast.a_recipe list) =
+  let rnames = List.map (fun r -> r.rname) recipes in
+  List.map
+    (fun name -> "Error: multiple recipes named " ^ name ^ ".")
+    (dup_string_check rnames)
+
+
+let rec collect_calls (s : Sast.a_stage) : (string * int) list =
+  List.fold_left collect_calls_stmt [] s.body
+and collect_calls_stmt (l : (string * int) list) (s : Sast.a_stmt) :
+      (string * int) list =
+  match s with
+    AExpr(ae) -> collect_calls_expr l ae
+  | ABlock(e_l) -> List.fold_left collect_calls_expr l e_l
+  | AIf(_, s1, s2) -> collect_calls_stmt (collect_calls_stmt l s1) s2
+and collect_calls_expr (l : (string * int) list) (e : Sast.a_expr) :
+      (string * int) list =
+  match e with
+    ACall(name, formals, _) -> (name, List.length formals) :: l
+  | _ -> l
+
+
+(* Check if all recipe calls are calls to library functions or user-defined
+   functions. Also checks if the number of arguments is correct.
+   Args:
+     recipes: a list of recipes, assumed to have unique names
+     stages: a list of stages
+ *)
+let generate_call_diagnostics (recipes : Sast.a_recipe list)
+                              (stages : Sast.a_stage list) : string list =
+  let rformals = List.fold_left
+                   (fun l r -> (r.rname, List.length r.formals) :: l)
+                   []
+                   recipes @ lib_funcs in
+  List.fold_left
+    (fun list stage ->
+     (List.fold_left
+        (fun l name_formals ->
+         let name = fst name_formals in
+         let count = snd name_formals in
+         if not(List.mem_assoc name rformals)
+         then ("Error in stage " ^ stage.sname ^ ": call to " ^ name ^
+                 " does not refer to a defined recipe.") :: l
+         else let ecount = List.assoc name rformals in
+              if ecount != count
+              then ("Error in stage " ^ stage.sname ^ ": call to " ^ name ^
+                      " expects " ^ (string_of_int ecount) ^ " arguments but " ^
+                        (string_of_int count) ^ " provided.") :: l
+              else l)
+        []
+        (collect_calls stage)) @ list)
+    []
+    stages
+
+
+(* Returns a list of diagnostics (warnings and errors) and whether any of the
+   diagnostics are fatal errors. *)
+let generate_diagnostics (p : Sast.a_program) : string list * bool =
+  let r_format name str = "In recipe " ^ name ^ ": " ^ str in
+  let r_internal_call_errors =
+    List.concat (List.map
+                   (fun r -> List.map
+                               (fun str -> r_format r.rname str)
+                               (generate_call_diagnostics p.recipes r.body))
+                   p.recipes)
+  and r_internal_diagnostics, has_r_internal_errors =
+    List.fold_left
+      (fun pair r -> let r_internal_s_warnings, r_internal_s_errors =
+                       generate_stage_diagnostics r.body in
+                     ((fst pair) @
+                        (List.map
+                           (fun str -> r_format r.rname str)
+                           r_internal_s_warnings) @
+                          (List.map
+                             (fun str -> r_format r.rname str)
+                             r_internal_s_errors)),
+                      snd pair || List.length r_internal_s_errors > 0)
+      ([], false)
+      p.recipes
+  and r_errors = generate_recipe_diagnostics p.recipes
+  and s_warnings, s_errors = generate_stage_diagnostics p.stages
+  and c_errors = generate_call_diagnostics p.recipes p.stages in
+  let all_diagnostics = (r_errors @ s_warnings @ s_errors @ c_errors @
+                         r_internal_call_errors @ r_internal_diagnostics) in
+  all_diagnostics, (has_r_internal_errors ||
+                      List.length all_diagnostics - List.length s_warnings > 0)

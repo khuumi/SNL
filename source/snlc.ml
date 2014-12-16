@@ -7,15 +7,6 @@ open Sast
 
 type action = Expr | Stmt | Program | Java
 
-(* Prints warnings and errors for stages.
-   Returns true if any errors, else false.*)
-let print_stage_diagnostics (stages : Sast.a_stage list) =
-  let stage_warnings, stage_errors =
-    Analyzer.generate_stage_diagnostics stages in
-  ignore (List.map print_endline stage_warnings);
-  ignore (List.map print_endline stage_errors);
-  if List.length stage_errors > 0 then true else false
-
 
 let write_out (filename : string) (buffer : string) =
   if Sys.file_exists filename then Sys.remove(filename);
@@ -50,12 +41,8 @@ let _ =
                 else "./" in
      let ast = Parser.program Scanner.tokenize lexbuf in
      let sast = Analyzer.annotate_program ast in
-     let recipe_errors = List.fold_left
-                           (fun error r ->
-                            error || print_stage_diagnostics r.body)
-                           false
-                           sast.recipes in
-     let any_error = recipe_errors || print_stage_diagnostics sast.stages in
+     let diagnostics, any_error = Analyzer.generate_diagnostics sast in
+     List.iter print_endline diagnostics;
      if any_error
      then failwith "Errors in program."
      else write_out (path ^ name ^ ".java") (Codegen.gen_main sast.stages name);
@@ -64,4 +51,3 @@ let _ =
                                 (path ^ "Recipe_" ^ recipe.rname ^ ".java")
                                 (Codegen.gen_recipe recipe))
                sast.recipes)
-     (*print_string (Ast.program_s ast)*)
