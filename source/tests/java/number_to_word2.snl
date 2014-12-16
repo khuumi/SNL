@@ -1,0 +1,4 @@
+start main:
+    numf is 15.2323
+    do show to "this should print " + (do number_to_word to numf) + " to console."
+done

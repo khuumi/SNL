@@ -1,0 +1,4 @@
+start main:
+    num is 15
+    do show to "this should print " + (do number_to_word to num) + " to console."
+done
