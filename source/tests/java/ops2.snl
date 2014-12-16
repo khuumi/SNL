@@ -1,0 +1,3 @@
+start anythin:
+	do show to 5 * 3 + 4 * 2
+done

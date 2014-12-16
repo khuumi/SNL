@@ -1,0 +1,12 @@
+recipe return to y:
+	start let_string:
+	y is true and y
+	return y
+	done
+done
+
+start for:
+	x is false
+	x is not (do return to z)
+	show x
+done

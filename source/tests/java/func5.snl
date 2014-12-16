@@ -1,0 +1,9 @@
+do recipe simple to a:
+start kicking:
+	return a*5 + 5
+done
+
+start real:
+	b is 10
+	do show to do simple to b
+done

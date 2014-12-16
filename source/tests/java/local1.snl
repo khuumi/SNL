@@ -1,0 +1,18 @@
+start locall:
+	local x is 5
+	do show to x
+	next second
+done
+
+second:
+	x is 50
+	do show to x
+	next third
+done
+
+third:
+	local x is 10
+	x is x + 450
+	do show to x
+	do show to local x
+		
