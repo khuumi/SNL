@@ -1,0 +1,23 @@
+recipe factorial to num:
+start init:
+    total is 1
+    next stage1
+done
+
+stage1:
+    if num = 0
+    (next last)
+
+    total is total*num
+    num is num-1
+    next stage1
+done
+
+last:
+    return total
+done
+done
+
+start main:
+    do show to do factorial to 10
+done
