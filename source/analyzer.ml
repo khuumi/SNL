@@ -235,31 +235,109 @@ let generate_stage_flow_diagnostics (stages : Sast.a_stage list) :
      []), errors
 
 
-(* Returns a list of warnings and a list of errors. *)
+(* Checks for duplicate strings in a list and returns the duplicates. *)
+let dup_string_check (names : string list) : string list =
+  StringMap.fold
+    (fun name count dups ->
+     if count > 1
+     then name :: dups
+     else dups)
+    (List.fold_left
+       (fun map name ->
+        if StringMap.mem name map
+        then StringMap.add name ((StringMap.find name map) + 1) map
+        else StringMap.add name 1 map)
+       StringMap.empty
+       names)
+    []
+
+
+(* Returns a list of warnings and a list of errors.
+   Warnings: if any stages are unreachable in the program.
+   Errors: if multiple stages have the same name,
+           if the number of stages marked start is not exactly one,
+           if any stages try to call 'next' to a stage that was not defined.
+*)
 let generate_stage_diagnostics (stages : Sast.a_stage list) :
       string list * string list =
   let snames = List.map (fun s -> s.sname) stages in
   let dup_name_errors =
-    StringMap.fold
-      (fun name count errors ->
-       if count > 1
-       then ("Error: multiple stages named " ^ name ^ ".") :: errors
-       else errors)
-      (List.fold_left
-         (fun map name ->
-          if StringMap.mem name map
-          then StringMap.add name ((StringMap.find name map) + 1) map
-          else StringMap.add name 1 map)
-         StringMap.empty
-         snames)
-      []
-  and num_starts = List.length (List.filter (fun s -> s.is_start) stages)
-  in let errors =
-       if num_starts > 1
-       then ["Error: more than one stage is marked start."] @ dup_name_errors
-       else if num_starts < 1
-       then ["Error: no stages marked start."] @ dup_name_errors
-       else dup_name_errors
-  in if List.length errors > 0
-     then [], errors
-     else generate_stage_flow_diagnostics stages
+    List.map
+      (fun name -> "Error: multiple stages named " ^ name ^ ".")
+      (dup_string_check snames)
+  and num_starts = List.length (List.filter (fun s -> s.is_start) stages) in
+  let errors =
+    if num_starts > 1
+    then ["Error: more than one stage is marked start."] @ dup_name_errors
+    else if num_starts < 1
+    then ["Error: no stages marked start."] @ dup_name_errors
+    else dup_name_errors in
+  if List.length errors > 0
+  then [], errors
+  else generate_stage_flow_diagnostics stages
+
+
+(* Check if multiple recipes have the same name. Returns a list of errors. *)
+let generate_recipe_diagnostics (recipes : Sast.a_recipe list) =
+  let rnames = List.map (fun r -> r.rname) recipes in
+  List.map
+    (fun name -> "Error: multiple recipes named " ^ name ^ ".")
+    (dup_string_check rnames)
+
+
+let rec collect_calls (s : Sast.a_stage) : (string * int) list =
+  List.fold_left collect_calls_stmt [] s.body
+and collect_calls_stmt (l : (string * int) list) (s : Sast.a_stmt) :
+      (string * int) list =
+  match s with
+    AExpr(ae) -> collect_calls_expr l ae
+  | ABlock(e_l) -> List.fold_left collect_calls_expr l e_l
+  | AIf(_, s1, s2) -> collect_calls_stmt (collect_calls_stmt l s1) s2
+and collect_calls_expr (l : (string * int) list) (e : Sast.a_expr) :
+      (string * int) list =
+  match e with
+    ACall(name, formals, _) -> (name, List.length formals) :: l
+  | _ -> l
+
+
+(* Check if all recipe calls are calls to library functions or user-defined
+   functions. Also checks if the number of arguments is correct.
+   Args:
+     recipes: a list of recipes, assumed to have unique names
+     stages: a list of stages
+ *)
+let generate_call_diagnostics (recipes : Sast.a_recipe list)
+                              (stages : Sast.a_stage list) : string list =
+  let rformals = List.fold_left
+                   (fun l r -> (r.rname, List.length r.formals) :: l)
+                   []
+                   recipes in
+  List.fold_left
+    (fun list stage ->
+     (List.fold_left
+        (fun l name_formals ->
+         let name = fst name_formals in
+         let count = snd name_formals in
+         if not(List.mem_assoc name rformals)
+         then ("Error in stage " ^ stage.sname ^ ": call to " ^ name ^
+                 " does not refer to a defined recipe.") :: l
+         else let ecount = List.assoc name rformals in
+              if ecount != count
+              then ("Error: call to " ^ name ^ " expects " ^
+                      (string_of_int ecount) ^ " arguments but " ^
+                        (string_of_int count) ^ " provided.") :: l
+              else l)
+        []
+        (collect_calls stage)) @ list)
+    []
+    stages
+
+
+(* Returns a list of diagnostics (warnings and errors) and whether any of the
+   diagnostics are failing errors. *)
+let generate_diagnostics (p : Sast.a_program) : string list * bool =
+  let rerrors = generate_recipe_diagnostics p.recipes
+  and swarnings, serrors = generate_stage_diagnostics p.stages
+  and cerrors = generate_call_diagnostics p.recipes p.stages in
+  let all_diagnostics = rerrors @ swarnings @ serrors @ cerrors in
+  all_diagnostics, List.length all_diagnostics - List.length swarnings > 0
