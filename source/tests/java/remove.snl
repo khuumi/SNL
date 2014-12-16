@@ -1,0 +1,7 @@
+start first:
+    lst is [4.2, 3, 3, 6]
+    do show to lst
+    do remove to lst, 0
+    do remove to lst, 0
+    do show to lst
+done
