@@ -317,7 +317,7 @@ public class SNLObject{
 
             // neq two strings
             if(type.equals(stringName))
-                snlo = new SNLObject(!this.getString().equals(right.getFloat()),
+                snlo = new SNLObject(!this.getString().equals(right.getString()),
                     boolName);            
         }
 
