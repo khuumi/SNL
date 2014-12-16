@@ -52,7 +52,7 @@ let rec to_string_expr (expr : a_expr) : string =
   | AUnop(op, e, _) ->  to_string_unop e op
   | ABinop(e1, op, e2, _) -> to_string_binop e1 e2 op
   | AAssign(e1, e2) -> to_string_expr e1 ^  "= " ^ to_string_expr e2
-  | ANext(s, _) -> "s_" ^ s ^ "()"
+  | ANext(s, _) -> "s_" ^ s ^ "();\nreturn"
   | AReturn(e, _) -> "ret = " ^ (to_string_expr e) ^ ";\n" ^ "return"
   | AList(e_list, _) -> to_string_list e_list
   | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
@@ -105,12 +105,14 @@ and to_string_call (name : string) (e_list : a_expr list) : string =
   | "insert" -> let lst = to_string_expr (List.nth e_list 0) in
                 let item_to_add = (to_string_expr (List.nth e_list 1)) in
                 let index = to_string_expr (List.nth e_list 2) in
-                lst ^ ".insert("^ index ^ ", " ^  item_to_add ^ ")"
+                lst ^ ".insert(" ^ index ^ ", " ^ item_to_add ^ ")"
   | "append" -> let lst = to_string_expr (List.nth e_list 0) in
                 let item_to_add = to_string_expr (List.nth e_list 1) in
                 lst ^ ".app(" ^ item_to_add ^ ")"
   | "length" -> let lst = to_string_expr (List.nth e_list 0) in
                 lst ^ ".length()"
+  | "word_to_number" -> let word = to_string_expr (List.nth e_list 0) in
+                        word ^ ".word_to_number()"
   | _ -> let list_e_strings = List.rev (List.fold_left
                                           (fun list e ->
                                            (to_string_expr e) :: list)

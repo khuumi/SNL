@@ -94,6 +94,10 @@ public class SNLObject{
         return valueInt;
     }
 
+    public SNLObject word_to_number(){
+        return new SNLObject(Integer.parseInt(getString()), "int");
+    }
+
     // helper method to check types
     private static boolean typeMatch(SNLObject subject, SNLObject desired){
         String s = subject.getType();
@@ -317,7 +321,7 @@ public class SNLObject{
 
             // neq two strings
             if(type.equals(stringName))
-                snlo = new SNLObject(!this.getString().equals(right.getFloat()),
+                snlo = new SNLObject(!this.getString().equals(right.getString()),
                     boolName);            
         }
 

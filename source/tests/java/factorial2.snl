@@ -1,0 +1,18 @@
+start init:
+    num is 5
+    total is 1
+    next stage1
+done
+
+stage1:
+    if num = 0
+    (next last)
+
+    total is total*num
+    num is num-1
+    next stage1
+done
+
+last:
+    do show to total
+done
