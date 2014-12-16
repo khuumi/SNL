@@ -1,24 +1,23 @@
 # These are comments
 # Recipe to calculate health lost
+# Recipes
 
 recipe calc_damage_done to attack, defense:
 	start calc:
 		if attack < defense
-		return 1
+		    (return 1)
 		else
-		return attack - defense
-done
+		    (return attack - defense)
+    done
 done
 
 recipe does_hit_land to attacker_speed, defender_speed:
 	start calc:
 		return attacker_speed >= defender_speed
+    done
 done
-done
 
-
-
-start dungeon_entrance:
+start init:
 	Character_HP is 10
 	Character_Attack is 10
 	Character_Defense is 5
@@ -28,37 +27,46 @@ start dungeon_entrance:
 	Ogre_Defense is 5
 	Ogre_Speed is 2
 	weapon_room_seen is false
-	
-	do show to “You are at the entrance of the dungeon. There are three doors in front of you. These are labelled 1, 2, and \”BOSS\”. Enter the label of the door you want to go through. Choose wisely: ”
+    inventory is ["awesome belt", "rusty sword"]
+    next dungeon_entrance
+done
+
+dungeon_entrance:	
+	do show to "You are at the entrance of the dungeon. There are three doors in front of you. These are labelled 1, 2, and \"BOSS\". Enter the label of the door you want to go through. You can also enter \"See inventory\" to see your current inventory. Choose wisely: "
 	choice is input
-	if choice = 1 and not weapon_room_seen
+	if choice = "1" and not weapon_room_seen
 		(next weapon_room)
-	else if choice = 1 and weapon_room_seen
-(do show to “You already went there!”
-next dungeon_entrance)	
-	else if choice = 2
-		(next trap_room)
-	else if choice = “BOSS”
-		(next boss_room_intro)
+	if choice = "1" and weapon_room_seen     
+        (do show to "You already went there!"
+        next dungeon_entrance)
+	if choice = "2"
+	    (next trap_room)
+    if choice = "See inventory"
+        (do show to inventory
+        next dungeon_entrance)
+	if choice = "BOSS"
+	    (next boss_room_intro)
 	else
-		(do show to “That’s not a valid door label! Try again.”
+		(do show to "That’s not a valid door label! Try again."
 		next dungeon_entrance)
 done
 
 weapon_room:
-do show to “You found a shiny sword! +5 attack and -1 speed. You return to the previous room.”
+    do show to "You found a shiny sword to replace your rusty sword! +5 attack and -1 speed. You return to the previous room."
 	Character_Attack is Character_Attack + 5
 	Character_Speed is Character_Speed - 1
 	weapon_room_seen is true
+    do append to inventory, "shiny sword"
+    do remove to inventory, 1
 	next dungeon_entrance
 done
 
 trap_room:
-	do show to “The door closes behind you and never opens again. SADNESS. THE END.”
+	do show to "The door closes behind you and never opens again. SADNESS. THE END."
 done
 
 boss_room_intro:
-	do show to “An ogre appeared!”
+	do show to "An ogre appeared!"
 	next boss_room
 done
 
@@ -68,43 +76,105 @@ boss_room:
 	if Ogre_HP < 1
 		(next ogre_death)
 
-	do show to “Will you try to hit or dodge? Type \”hit\” or \”dodge and try hitting\”.”
+	do show to "Will you try to hit or dodge? Type \"hit\" or \"dodge and try hitting\"."
 	battle_move is input
 
-	if battle_move = “hit”
-		(dam is do calc_damage_done to Character_Attack, Ogre_Defense
+	if battle_move = "hit"
+		(dam is (do calc_damage_done to Character_Attack, Ogre_Defense)
 		Ogre_HP is Ogre_HP - dam
-		do show to “You hit the ogre inflicting “ + dam + “ damage!”
+		do show to "You hit the ogre inflicting " + (do number_to_word to dam) + " damage!"
 		dam is do calc_damage_done to Ogre_Attack, Character_Defense
 		Character_HP is Character_HP - dam
-		do show to “The ogre hit you inflicting “ + dam + “ damage!”)
+		do show to "The ogre hit you inflicting " + (do number_to_word to dam) + " damage!")
 
-	else if battle_move = “dodge and try hitting”
-		(success is do does_hit_land Ogre_Speed, Character_Speed
+	else 
+        (if battle_move = "dodge and try hitting"
+		    (success is (do does_hit_land to Ogre_Speed, Character_Speed)
 
-		if success
-			(dam is do calc_damage_done to Ogre_Attack, Character_Defense
-Character_HP is Character_HP - dam
-do show to “The ogre hit you inflicting “ + dam + “ damage!”)
+		    if success
+			    (dam is do calc_damage_done to Ogre_Attack, Character_Defense
+                Character_HP is Character_HP - dam
+                do show to "The ogre hit you inflicting " + (do number_to_word to dam) + " damage!")
+            else
+                (dam is do calc_damage_done to Character_Attack, Ogre_Defense
+                Ogre_HP is Ogre_HP - dam
+                do show to "You dodged and hit the ogre for " + (do number_to_word to dam) + " damage!")
+            )
 
-else
-(dam is do calc_damage_done to Character_Attack, Ogre_Defense
-Ogre_HP is Ogre_HP - dam
-do show to “You dodged and hit the ogre for “ + dam + “ damage!”)
-)
-
-else
-	(dam is do calc_damage_done to Ogre_Attack, Character_Defense
-	Character_HP is Character_HP - dam
-	do show to “The ogre hit you inflicting “ + dam + “ damage!”)
+        else
+	        (dam is do calc_damage_done to Ogre_Attack, Character_Defense
+	        Character_HP is Character_HP - dam
+	        do show to "The ogre hit you inflicting " + (do number_to_word to dam) + " damage!")
+        )
 
 next boss_room
 done
 
 character_death:
-	do show to “You died. Sadness. THE END.”
+	do show to "You died. Sadness. THE END."
 done
 
 ogre_death:
-	do show to “The ogre died. You win!!! THE END.”
+	do show to "The ogre died."
+    input
+    do show to "BONUS STAGE! BONUS STAGE! BONUS STAGE!"
+    next who_said_it
+done
+
+who_said_it:
+    points is 0
+    do show to "Welcome to \"Jaden vs. Sartre\", the game that asks the question of whether Will Smith's son is in fact the philosopher's contemporary incarnate. You will be shown a series of quotes to which you will need to respond \"jaden\" or \"sartre\" depending on who you think said the quote. Good luck!"
+    input
+    do show to ""
+    do show to "\"Unawareness is the only sin.\""
+    choice is input
+    if choice = "jaden"
+        (points is points + 1
+        do show to "Correct!")
+    else
+        (do show to "Wrong!")
+    input    
+
+    do show to ""
+    do show to "\"The human consciousness must raise before I speak my juvenile philosophy.\""
+    choice is input
+    if choice = "jaden"
+        (points is points + 1
+        do show to "Correct!")
+    else
+        (do show to "Wrong!")
+    input
+
+    do show to ""
+    do show to "\"Why is it so important to think the same things all together?\""
+    choice is input
+    if choice = "sartre"
+        (points is points + 1
+        do show to "Correct!")
+    else
+        (do show to "Wrong!")
+    input
+
+    do show to ""
+    do show to "\"Most trees are blue.\""
+    choice is input
+    if choice = "jaden"
+        (points is points + 1
+        do show to "Correct!")
+    else
+        (do show to "Wrong!")
+    input
+
+    do show to ""
+    do show to "\"Nothing has changed and yet everything is different.\""
+    choice is input
+    if choice = "sartre"
+        (points is points + 1
+        do show to "Correct!")
+    else
+        (do show to "Wrong!")
+    input
+
+    do show to ""
+    do show to ("You answered " + (do number_to_word to points) + " correctly! Thanks for playing!")
 done
