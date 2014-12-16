@@ -1,2 +1,2 @@
-If (Binop (Id Global y) Gt (Float 15.9)) (Block [(Assign (Id Global y) (Binop (Id Global y) Add (Int 7))),
-(Assign (Id Global z) (Binop (Id Global z) Sub (Float 53.8)))]) (Block [(Assign (Id Local x) (Bool false))])
+If (Binop (Id Global y) Gt (Float 15.9)) (Block [(Expr (Assign (Id Global y) (Binop (Id Global y) Add (Int 7)))),
+(Expr (Assign (Id Global z) (Binop (Id Global z) Sub (Float 53.8))))]) (Block [(Expr (Assign (Id Local x) (Bool false)))])
