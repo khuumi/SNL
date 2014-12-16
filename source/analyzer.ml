@@ -7,7 +7,8 @@ module StringSet = Set.Make(String);;
 
   
 let lib_funcs = [("show", 1); ("remove", 2); ("insert", 3);
-                 ("append", 2); ("length", 1)];;
+                 ("append", 2); ("length", 1);
+                 ("word_to_number", 1); ("number_to_word", 1)];;
 
 
 (* A symbol table wich includes a parent symbol table

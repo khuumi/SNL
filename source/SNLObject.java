@@ -94,8 +94,19 @@ public class SNLObject{
         return valueInt;
     }
 
+    // goes from a string to a number
     public SNLObject word_to_number(){
         return new SNLObject(Integer.parseInt(getString()), "int");
+    }
+
+    // goes from a number to a string
+    public SNLObject number_to_word(){
+        SNLObject ret = null;
+        if(getType().equals(intName))
+            ret = new SNLObject(String.valueOf(getInt()), "string");
+        if(getType().equals(floatName))
+            ret = new SNLObject(String.valueOf(getFloat()), "string");
+        return ret;
     }
 
     // helper method to check types
