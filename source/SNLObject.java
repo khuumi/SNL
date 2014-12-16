@@ -587,6 +587,11 @@ public class SNLObject{
         return ret;
     }
 
+    // remove from the tail of a list
+    public SNLObject remove_back(){
+        return remove(new SNLObject(valueList.length-1, "int"));
+    }
+
     // get the length of the list
     public SNLObject length(){
         return new SNLObject(valueList.length, "int");
