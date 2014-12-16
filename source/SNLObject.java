@@ -94,7 +94,7 @@ public class SNLObject{
         return valueInt;
     }
 
-    public SNLObject word_to_number(SNLObject word){
+    public SNLObject word_to_number(){
         return new SNLObject(Integer.parseInt(getString()), "int");
     }
 
