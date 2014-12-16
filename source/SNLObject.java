@@ -101,7 +101,7 @@ public class SNLObject{
 
     // goes from a number to a string
     public SNLObject number_to_word(){
-        SNLObject ret;
+        SNLObject ret = null;
         if(getType().equals(intName))
             ret = new SNLObject(String.valueOf(getInt()), "string");
         if(getType().equals(floatName))
