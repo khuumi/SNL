@@ -15,7 +15,6 @@
 %nonassoc NOELSE
 %nonassoc ELSE
 %nonassoc RETURN
-%nonassoc NOTO
 %nonassoc DO TO
 %right ASSIGN
 %left AND OR
@@ -38,16 +37,17 @@
 
 %%
 
+
 /* Matches NEWLINE* */
 opt_nl:
-    /* nothing */  { }
-  | NEWLINE opt_nl { }
+    /* nothing */ %prec NOCOMMA { }
+  | multi_nl      %prec NOCOMMA { }
 
 
 /* Matches NEWLINE+ */
 multi_nl:
-    NEWLINE          { }
-  | NEWLINE multi_nl { }
+    NEWLINE          %prec COMMA { }
+  | multi_nl NEWLINE %prec COMMA { }
 
 
 /* int, float, bool, string literals. */
@@ -112,45 +112,45 @@ expr_seq:
 
 
 expr_seq_builder:
-    expr %prec COMMA            { [$1] }
+    expr %prec NOCOMMA          { [$1] }
   | expr_seq_builder COMMA expr { $3 :: $1 }
 
 
 /* Applying recipes. */
 recipe_app:
-    DO ID TO expr_seq { Call($2, $4) }
-  | DO ID %prec NOTO  { Call($2, []) }
+    DO ID TO expr_seq_builder %prec NOCOMMA { Call($2, List.rev $4) }
+  | DO ID                                   { Call($2, []) }
 
 
 /* A statement is either an expression or an if-else construct. */
 stmt:
-    expr multi_nl { Expr($1) }
-  | IF expr multi_nl LPAREN block_builder RPAREN opt_nl
-    ELSE opt_nl LPAREN block_builder RPAREN multi_nl
-      { If($2, Block(List.rev $5), Block(List.rev $11)) }
-  | IF expr multi_nl LPAREN block_builder RPAREN multi_nl %prec NOELSE
+    expr %prec NOELSE { Expr($1) }
+  | IF expr multi_nl LPAREN block_builder RPAREN
+    ELSE opt_nl LPAREN block_builder RPAREN
+      { If($2, Block(List.rev $5), Block(List.rev $10)) }
+  | IF expr multi_nl LPAREN block_builder RPAREN %prec NOELSE
       { If($2, Block(List.rev $5), Block([])) }
 
 
 /* A block is a sequence of expr separated by newlines that appears in an
    if statement. */
 block_builder:
-    expr                        { [$1] }
-  | block_builder multi_nl expr { $3 :: $1 }
+    stmt                      { [$1] }
+  | block_builder multi_nl stmt { $3 :: $1 }
 
 
 stage_body:
-    stmt                    { [$1] }
-  | stage_body stmt { $2 :: $1 }
+    stmt                   { [$1] }
+  | stage_body opt_nl stmt { $3 :: $1 }
 
 
 stage:
-    ID COLON multi_nl stage_body DONE       { { sname = $1;
-                                                body = List.rev $4;
-                                                is_start = false } }
-  | START ID COLON multi_nl stage_body DONE { { sname = $2;
-                                                body = List.rev $5;
-                                                is_start = true } }
+    ID COLON multi_nl stage_body opt_nl DONE       { { sname = $1;
+                                                       body = List.rev $4;
+                                                       is_start = false } }
+  | START ID COLON multi_nl stage_body opt_nl DONE { { sname = $2;
+                                                       body = List.rev $5;
+                                                       is_start = true } }
 
 
 formal_list:

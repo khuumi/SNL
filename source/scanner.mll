@@ -27,8 +27,8 @@ rule tokenize = parse
   | "not"    { NOT }
 
   (* Control flow. *)
-  | "if"     { IF }
-  | "else"   { ELSE }
+  | "if"                      { IF }
+  | ("\n"|whitespace)* "else" { ELSE }
 
   (* Function calls. *)
   | "do"     { DO }

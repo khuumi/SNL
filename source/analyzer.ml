@@ -141,7 +141,7 @@ let rec annotate_expr (e : Ast.expr) (env : environment) : Sast.a_expr =
 let rec annotate_stmt (s : Ast.stmt) (env : environment) : Sast.a_stmt =
   match s with
     Expr(e) -> AExpr(annotate_expr e env)
-  | Block(e_list) -> ABlock(List.map (fun e -> annotate_expr e env) e_list)
+  | Block(s_list) -> ABlock(List.map (fun s -> annotate_stmt s env) s_list)
   | If(e, s1, s2) -> let ae = annotate_expr e env in
                      AIf(ae,
                          annotate_stmt s1 env,
@@ -178,7 +178,7 @@ let rec collect_outs (s : Sast.a_stage) : string list =
 and collect_nexts_stmt (l : string list) (s : Sast.a_stmt) : string list =
   match s with
     AExpr(ae) -> collect_nexts_expr l ae
-  | ABlock(e_l) -> List.fold_left collect_nexts_expr l e_l
+  | ABlock(s_l) -> List.fold_left collect_nexts_stmt l s_l
   | AIf(_, s1, s2) -> collect_nexts_stmt (collect_nexts_stmt l s1) s2
 and collect_nexts_expr (l : string list) (e : Sast.a_expr) : string list =
   match e with
@@ -295,7 +295,7 @@ and collect_calls_stmt (l : (string * int) list) (s : Sast.a_stmt) :
       (string * int) list =
   match s with
     AExpr(ae) -> collect_calls_expr l ae
-  | ABlock(e_l) -> List.fold_left collect_calls_expr l e_l
+  | ABlock(s_l) -> List.fold_left collect_calls_stmt l s_l
   | AIf(_, s1, s2) -> collect_calls_stmt (collect_calls_stmt l s1) s2
 and collect_calls_expr (l : (string * int) list) (e : Sast.a_expr) :
       (string * int) list =

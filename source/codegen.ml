@@ -134,12 +134,12 @@ and to_string_list (e_list : a_expr list) : string =
 let rec to_string_stmt (statement : a_stmt) =
   match statement with
     AExpr(e) -> (to_string_expr e) ^ ";\n"
-  | ABlock(e_list) ->
+  | ABlock(s_list) ->
      let list_of_strings = List.rev (List.fold_left
                                        (fun list e ->
-                                        (to_string_expr e ^";\n") :: list)
+                                        (to_string_stmt e ^";\n") :: list)
                                        []
-                                       e_list) in
+                                       s_list) in
      String.concat "" list_of_strings
   | AIf(e, first, second) -> let expr_str = (to_string_expr e ) in
                              let first_str = to_string_stmt first in

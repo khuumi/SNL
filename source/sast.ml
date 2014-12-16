@@ -30,7 +30,7 @@ type a_expr =
 
 type a_stmt =
     AExpr of a_expr
-  | ABlock of a_expr list
+  | ABlock of a_stmt list
   | AIf of a_expr * a_stmt * a_stmt
 
 type a_stage = {

@@ -26,7 +26,7 @@ type expr =
 
 type stmt =
     Expr of expr
-  | Block of expr list
+  | Block of stmt list
   | If of expr * stmt * stmt
 
 type stage = {
@@ -99,9 +99,9 @@ let rec expr_s = function
 
 let rec stmt_s = function
     Expr(e) -> "Expr (" ^ expr_s e ^ ")"
-  | Block(es) -> "Block [" ^
+  | Block(ss) -> "Block [" ^
                    String.concat ",\n"
-                                 (List.map (fun e -> "(" ^ expr_s e ^ ")") es) ^
+                                 (List.map (fun s -> "(" ^ stmt_s s ^ ")") ss) ^
                      "]"
   | If(e, s1, s2) -> "If (" ^ expr_s e ^ ") (" ^ stmt_s s1 ^ ") (" ^
                        stmt_s s2 ^ ")"
