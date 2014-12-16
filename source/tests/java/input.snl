@@ -1,0 +1,9 @@
+start string:
+	next for
+done
+
+for:
+	do show to "Now accepting input"
+	foo is input
+	do show to foo
+done
