@@ -38,10 +38,16 @@
 
 %%
 
-/* An optional newline; matches the regex '\n*' since NEWLINE is '\n+'. */
+/* An optional newline. */
 opt_nl:
-    /* nothing */ { }
-  | NEWLINE       { }
+    /* nothing */  { }
+  | NEWLINE opt_nl { }
+
+
+/* Matches NEWLINE+ */
+multi_nl:
+    NEWLINE          { }
+  | NEWLINE multi_nl { }
 
 
 /* int, float, bool, string literals. */
@@ -182,7 +188,7 @@ program_body:
 
 
 program:
-    /* nothing */        { { recipes = [];
-                             stages = []; } }
-  | program_body         { $1 }
-  | NEWLINE program_body { $2 }
+    /* nothing */         { { recipes = [];
+                              stages = []; } }
+  | program_body          { $1 }
+  | multi_nl program_body { $2 }
