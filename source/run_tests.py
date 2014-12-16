@@ -137,7 +137,7 @@ def run_java_tests():
                 continue
             finally:
                 for f in os.listdir(temp_dir):
-                    if f != 'SNLObject.class':
+                    if not f.startswith('SNLObject'):
                         os.remove(os.path.join(temp_dir, f))
             if expected_output != output:
                 TOTAL_FAIL += 1

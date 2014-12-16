@@ -15,13 +15,13 @@ let lib_funcs = [("show", 1); ("remove", 2); ("insert", 3);
    and variables which are tuples of stings and Sast types *)
 type symbol_table = {
     mutable variables : (string * Sast.t) list;
-}
+  }
 
 
 type environment = {
     global_scope : symbol_table;
     local_scope : symbol_table;
-}
+  }
 
 
 let type_of_const (ac : Sast.a_constant) : Sast.t =
@@ -262,7 +262,7 @@ let dup_string_check (names : string list) : string list =
    Errors: if multiple stages have the same name,
            if the number of stages marked start is not exactly one,
            if any stages try to call 'next' to a stage that was not defined.
-*)
+ *)
 let generate_stage_diagnostics (stages : Sast.a_stage list) :
       string list * string list =
   let snames = List.map (fun s -> s.sname) stages in
@@ -359,13 +359,13 @@ let generate_diagnostics (p : Sast.a_program) : string list * bool =
                           (List.map
                              (fun str -> r_format r.rname str)
                              r_internal_s_errors)),
-                      snd pair || List.length r_internal_s_errors > 0)
+                     snd pair || List.length r_internal_s_errors > 0)
       ([], false)
       p.recipes
   and r_errors = generate_recipe_diagnostics p.recipes
   and s_warnings, s_errors = generate_stage_diagnostics p.stages
   and c_errors = generate_call_diagnostics p.recipes p.stages in
   let all_diagnostics = (r_errors @ s_warnings @ s_errors @ c_errors @
-                         r_internal_call_errors @ r_internal_diagnostics) in
+                           r_internal_call_errors @ r_internal_diagnostics) in
   all_diagnostics, (has_r_internal_errors ||
                       List.length all_diagnostics - List.length s_warnings > 0)

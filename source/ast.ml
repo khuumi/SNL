@@ -33,18 +33,18 @@ type stage = {
     sname: string;        (* Name of the stage. *)
     body: stmt list;      (* The statements that comprise the stage. *)
     is_start: bool;       (* Whether the stage is a start stage. *)
-}
+  }
 
 type recipe = {
     rname: string;         (* Name of the recipe. *)
     formals: string list;  (* Formal argument names. *)
     body: stage list;      (* Stages in the recipe's scope. *)
-}
+  }
 
 type program = {
     recipes: recipe list;
     stages: stage list;
-}
+  }
 
 
 (* Low-level AST printing, to help debug the structure. *)
@@ -121,4 +121,4 @@ let recipe_s r =
 let program_s prog =
   "recipes = [" ^ String.concat ",\n" (List.map recipe_s prog.recipes) ^
     "],\n" ^
-    "stages = [" ^  String.concat ",\n" (List.map stage_s prog.stages) ^ "]"
+      "stages = [" ^  String.concat ",\n" (List.map stage_s prog.stages) ^ "]"

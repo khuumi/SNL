@@ -37,15 +37,15 @@ type a_stage = {
     sname: string;        (* Name of the stage. *)
     body: a_stmt list;    (* The annotated statements in the stage. *)
     is_start: bool;       (* Whether the stage is a start stage. *)
-}
+  }
 
 type a_recipe = {
     rname: string;         (* Name of the recipe. *)
     formals: string list;  (* Formal argument names. *)
     body: a_stage list;      (* Stages in the recipe's scope. *)
-}
+  }
 
 type a_program = {
     recipes: a_recipe list;
     stages: a_stage list;
-}
+  }

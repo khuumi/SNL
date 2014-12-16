@@ -28,21 +28,21 @@ let get_initial_stage_header (start_stage_name : string)
 
 let to_string_const (const : a_constant) : string =
   match const with
-    AInt(num, _) -> " new SNLObject(" ^ (string_of_int num) ^ ", \"int\")"
-  | AFloat(fl, _) ->" new SNLObject(" ^ (string_of_float fl) ^ ", \"float\")"
-  | ABool(b, _) -> " new SNLObject(" ^  (string_of_bool b) ^ ", \"bool\")"
-  | AString(s, _) -> " new SNLObject(\"" ^ s ^ "\", \"string\")"
+    AInt(num, _) -> " new SNLObject(" ^ (string_of_int num) ^ ")"
+  | AFloat(fl, _) ->" new SNLObject(" ^ (string_of_float fl) ^ ")"
+  | ABool(b, _) -> " new SNLObject(" ^  (string_of_bool b) ^ ")"
+  | AString(s, _) -> " new SNLObject(\"" ^ s ^ "\")"
 
 
 let to_string_id (name : string) (scope : Ast.scope) : string =
   match scope with
-      Local -> (match Hashtbl.mem local_scope name with
-                     true -> name
-                   | false->  Hashtbl.add local_scope name name;
-                              "SNLObject " ^ name)
-    | Global -> (match Hashtbl.mem global_scope name with
-                     true -> name
-                   | false-> Hashtbl.add global_scope name name; name)
+    Local -> (match Hashtbl.mem local_scope name with
+                true -> name
+              | false->  Hashtbl.add local_scope name name;
+                         "SNLObject " ^ name)
+  | Global -> (match Hashtbl.mem global_scope name with
+                 true -> name
+               | false-> Hashtbl.add global_scope name name; name)
 
 
 let rec to_string_expr (expr : a_expr) : string =
@@ -55,7 +55,7 @@ let rec to_string_expr (expr : a_expr) : string =
   | ANext(s, _) -> "s_" ^ s ^ "();\nreturn"
   | AReturn(e, _) -> "ret = " ^ (to_string_expr e) ^ ";\n" ^ "return"
   | AList(e_list, _) -> to_string_list e_list
-  | AInput(t) -> "new SNLObject(input.nextLine(), \"string\")"
+  | AInput(t) -> "new SNLObject(input.nextLine())"
   | ACall(s, e_list, _) -> to_string_call s e_list
   | AAccess(index_e, e, _) -> (to_string_expr e) ^
                                 ".getArr()[" ^
@@ -69,7 +69,7 @@ and to_string_unop (e : a_expr) (op : Ast.op) : string =
       Negate -> "neg"
     | Not -> "not"
     | _ -> "Error" in
-     (to_string_expr e) ^ "." ^ string_op ^ "()"
+  (to_string_expr e) ^ "." ^ string_op ^ "()"
 
 
 and to_string_binop (e1 : a_expr) (e2 : a_expr) (op : Ast.op) =
@@ -130,7 +130,7 @@ and to_string_list (e_list : a_expr list) : string =
                                     (to_string_expr e) :: list)
                                    []
                                    e_list) in
-  "new SNLObject(\"list\", " ^ (String.concat ", " list_e_strings) ^ ")"
+  "new SNLObject(" ^ (String.concat ", " list_e_strings) ^ ")"
 
 
 let rec to_string_stmt (statement : a_stmt) =
@@ -157,7 +157,7 @@ let to_string_stage (stage : a_stage)
   let header =
     if is_recipe then "private void s_" ^ stage.sname ^ "(){\n"
     else "private static void s_" ^ stage.sname ^ "(){\n"
-    in
+  in
   let initial_header =
     if stage.is_start
     then get_initial_stage_header stage.sname is_recipe formals
@@ -186,8 +186,8 @@ let to_string_stages (stages : a_stage list)
     else Hashtbl.fold (fun k v acc ->
                        "private static SNLObject "
                        ^ k ^ ";\n" ^ acc) global_scope ""
-    in
-    (String.concat "" list_of_strings) ^ global_vars ^ "}"
+  in
+  (String.concat "" list_of_strings) ^ global_vars ^ "}"
 
 
 (* name should be the file name of the snl file or recipe
@@ -196,12 +196,12 @@ let make_header (name : string) (is_recipe : bool) : string =
   let scanner = "import java.util.Scanner;\n" in
   if is_recipe
   then let scanner2 = "\tprivate Scanner input = new Scanner(System.in);" in 
-        scanner ^ "public class " ^ "Recipe_" ^ name ^ "{\n" ^
-          "\tprivate SNLObject ret;\n" ^ scanner2 ^ "\npublic Recipe_" ^ name ^
-            "(){}\n"
+       scanner ^ "public class " ^ "Recipe_" ^ name ^ "{\n" ^
+         "\tprivate SNLObject ret;\n" ^ scanner2 ^ "\npublic Recipe_" ^ name ^
+           "(){}\n"
   else let scanner2 = "\tprivate static Scanner input = " ^
                         "new Scanner(System.in);" in
-        scanner ^ "public class " ^ name ^ "{\n" ^ scanner2
+       scanner ^ "public class " ^ name ^ "{\n" ^ scanner2
 
 
 let gen_main (stages : a_stage list) (name : string) : string =

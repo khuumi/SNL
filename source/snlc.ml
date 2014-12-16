@@ -1,4 +1,4 @@
-(* Usage: ./snl [-e | -s | -p | -j] file [-o output_file] *)
+(* Usage: ./snlc [-e | -s | -p | -j] file [-o output_file] *)
 
 open Analyzer
 open Printf
