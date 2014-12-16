@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 
-AST_BIN = "./snl"
+AST_BIN = "./snlc"
 TOTAL_PASS = 0
 TOTAL_FAIL = 0
 

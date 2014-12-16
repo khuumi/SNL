@@ -1,11 +1,11 @@
 ast_test: touch objects java compiler
-	ocamlc -o snl ast.cmo parser.cmo scanner.cmo str.cma codegen.cmo analyzer.cmo snl.cmo
+	ocamlc -o snlc ast.cmo parser.cmo scanner.cmo str.cma codegen.cmo analyzer.cmo snlc.cmo
 
 touch:
 	touch codegen.ml
 
-compiler: snl.ml
-	ocamlc -c snl.ml
+compiler: snlc.ml
+	ocamlc -c snlc.ml
 
 java: codegen.ml
 	ocamlc -c codegen.ml
@@ -25,4 +25,4 @@ test: ast_test
 
 .PHONY: clean
 clean:
-	rm -f parser.mli scanner.ml parser.ml parser.output *.cmo *.cmi snl *~
+	rm -f parser.mli scanner.ml parser.ml parser.output *.cmo *.cmi snlc *~
