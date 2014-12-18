@@ -4,9 +4,11 @@ start example_program:
 	# need to have it infer same information as above
 	# number of elements, type of each element
 
+    do show to lst
+    input
 	changedlst is do rotate_list to lst
-	do show to lst
 	do show to changedlst
+    input
     i is 1 of changedlst
     0 of changedlst is "first!"
     do show to changedlst
