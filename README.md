@@ -1,4 +1,4 @@
-SNL (Stage (null) Language) Project Proposal
+SNL (Stage (null) Language)
 ===================================
 Alex Liu, al3037 (Language Guru)
 Andre Paiva, app2125 (Verification & Validation)
